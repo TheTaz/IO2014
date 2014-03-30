@@ -1,6 +1,6 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  var socket = io.connect('http://localhost');
+  var socket = io.connect('http://localhost/client');
   socket.on('task', function (data) {
     console.log("Code to eval:\n " + data.code);
     console.log("Result " + eval(data.code));

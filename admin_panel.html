@@ -1,0 +1,23 @@
+<html>
+
+	<script src='/socket.io/socket.io.js'></script>
+	<script>
+  		var socket = io.connect('http://localhost/admin');
+  		function sendCommand() {
+  			console.log('sending command...');
+  			socket.emit('command', 'show pending tasks');
+  		}
+	</script>
+
+	<head> 
+		Admin's panel 
+	</head>
+
+	<body>
+			<br>
+			<br>
+			<button onclick="sendCommand()">Send</button>
+	</body>
+
+</html>
+
