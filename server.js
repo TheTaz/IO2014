@@ -30,9 +30,7 @@ io.of('/client').on('connection', function (socket) {
 
 io.of('/admin').on('connection', function (socket) {
 	console.log("admin connected");
+	io.of('/admin').clients()[io.of('/admin').clients().length - 1].on('command', function (data) {
+		console.log('command executed: ' + data);
+	});
 });
-
-io.of('/admin').on('command', function (data) {
-	console.log('command executed');
-});
-

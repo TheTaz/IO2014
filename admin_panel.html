@@ -5,7 +5,8 @@
   		var socket = io.connect('http://localhost/admin');
   		function sendCommand() {
   			console.log('sending command...');
-  			socket.emit('command', 'show pending tasks');
+  			var command = document.getElementById('command').value;
+  			socket.emit('command', command);
   		}
 	</script>
 
@@ -14,9 +15,10 @@
 	</head>
 
 	<body>
-			<br>
-			<br>
-			<button onclick="sendCommand()">Send</button>
+		<br>
+		<br>
+		<input id='command' type="text">
+		<button onclick="sendCommand()">Send</button>
 	</body>
 
 </html>
