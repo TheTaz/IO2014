@@ -1,4 +1,4 @@
-find_primes_in_range =  function(a, b) {
+findPrimesInRange =  function(a, b) {
 	var primes = [];
 	for(var i = a; i <= b; i++) {
 		var is_prime = true;
@@ -18,6 +18,6 @@ find_primes_in_range =  function(a, b) {
 }
 
 module.exports = {
-	find_primes_in_range : find_primes_in_range
+	"findPrimesInRange" : findPrimesInRange
 
 }
