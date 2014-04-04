@@ -5,5 +5,3 @@ cs_filename=$(ls -t *.coffee)
 
 coffee -c $cs_filename
 
-rm -f $cs_filename
-
