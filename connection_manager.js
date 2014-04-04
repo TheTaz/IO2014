@@ -5,8 +5,8 @@ function ConnectionManager(sockets) {
 }
 
 ConnectionManager.prototype.on_connection = function(callback) {
-	this.sockets.on('connection', function() {
-		callback();
+	this.sockets.on('connection', function(socket) {
+		callback(socket);
 	});
 }
 

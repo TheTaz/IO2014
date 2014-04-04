@@ -1,14 +1,14 @@
-var initializeClientServer = function(io) {
+var initializeClientServer = function(io, clientsEndpoint) {
 	var tasks = require("./tasks.js");
 
 	var Dispatcher = require("./task_dispacher.js");
 	var ConnectionManager = require("./connection_manager.js");
 
 	var dispatcher = new Dispatcher();
-	var connectionManager = new ConnectionManager(io.of("/clients"));
+	var connectionManager = new ConnectionManager(io.of(clientsEndpoint));
 
-	connectionManager.on_connection(function() {
-		console.log("new user connected")
+	connectionManager.on_connection(function (socket) {
+		console.log("new user connected");
 
 		if(connectionManager.connected_clients().length == 3) {
 			console.log("starting task")
