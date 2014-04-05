@@ -1,5 +1,8 @@
 # nodejs stuff
 /node_modules
 
+# binaries dir
+/bin
+
 # logs
 *.log
