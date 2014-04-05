@@ -1,5 +1,4 @@
 #Script translating Coffee Script to Java Script
-#!/bin/bash
 
 #Deleting bin folder
 rm -rf bin/
