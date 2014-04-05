@@ -16,8 +16,8 @@
     "utilities": "./utils"
   },
   "scripts": {
-    "prepublish": "sh ./utils/cs_to_js.sh",
-    "prestart": "sh ./utils/cs_to_js.sh",
+    "prepublish": ". ./utils/cs_to_js.sh",
+    "prestart": ". ./utils/cs_to_js.sh",
     "start": "node ./bin/server.js",
     "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee ./spec/"
   }
