@@ -1,13 +1,13 @@
-var app = require('express')()
-	  , server = require('http').createServer(app)
-	  , io = require('socket.io').listen(server);
+var app = require('express')(),
+    server = require('http').createServer(app),
+    io = require('socket.io').listen(server);
 
 var clientsEndpoint = "/clients";
 var adminEndpoint = "/admin";
 
 var initializeServer = function() {
 	server.listen(3000);
-}	
+}
 
 var initializeClientsServer = function(){
 	app.get(clientsEndpoint, function (req, res) {

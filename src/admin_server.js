@@ -6,6 +6,7 @@ var initializeAdminServer = function(io, adminEndpoint) {
 		console.log("admin connected");
 		socket.on('command', function (data) {
 			console.log('command executed: ' + data);
+            socket.emit('result', 'Task completed! Result is: 3.14159265...');
 		});
 	});
 }
