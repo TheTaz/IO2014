@@ -7,6 +7,8 @@
   			console.log('sending command...');
   			var command = document.getElementById('command').value;
   			socket.emit('command', command);
+            document.getElementById('result').scrollIntoView();
+
   		}
         socket.on('result', function (result){
             console.log('received result: ' + result);
@@ -20,8 +22,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <link href="bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="./bootstrap/css/bootstrap.css" rel="stylesheet">
+        <link href="./bootstrap/css/bootstrap-theme.css" rel="stylesheet">
 
     </head>
 
@@ -44,24 +46,17 @@
                         <li><a href="#send">Task sending</a></li>
                         <li><a href="#progress">Progress bars</a></li>
                         <li><a href="#receive">Task results</a></li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
-                                <li class="divider"></li>
-                                <li class="dropdown-header">Nav header</li>
-                                <li><a href="#">Separated link</a></li>
-                                <li><a href="#">One more separated link</a></li>
-                            </ul>
-                        </li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
         </div>
 
         <div class="container theme-showcase" role="main">
+
+            <br>
+            <br>
+            <br>
+            <br>
 
             <div class="jumbotron">
                 <h1>Volunteer computing</h1>
@@ -75,7 +70,7 @@
                 <h3>Here we can post tasks to execute</h3>
             </div>
 
-            <textarea class="col-md-12" style="margin-bottom: 50px; height: 600px" id='command'></textarea>
+            <textarea class="col-md-12" style="margin-bottom: 50px; height: 400px" id='command'></textarea>
 
             <button type="button" class=" col-md-12 btn btn-lg btn-primary" onclick="sendCommand()">Send</button>
 
