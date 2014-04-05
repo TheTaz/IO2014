@@ -6,7 +6,8 @@
   "dependencies": {
     "express": "3.x",
     "socket.io": "0.9.x",
-    "jasmine-node": "2.0"
+    "jasmine-node_modules": "2.0",
+    "r": "x.x.x"
   },
   "directories": {
     "src": "./src",
