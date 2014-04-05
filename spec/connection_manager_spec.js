@@ -1,6 +1,8 @@
+GLOBAL.requires = require('r').r;
+
 describe("ConnectionManager", function() {
     var sockets = jasmine.createSpyObj('sockets', ['on', 'clients']);
-    var ConnectionManager = require("../src/connection_manager.js");
+    var ConnectionManager = requires(">/src/connection_manager.js");
     var connectionManager = new ConnectionManager(sockets);
 
     it("returns list of connected clients", function() {
