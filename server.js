@@ -11,8 +11,8 @@ var initializeServer = function() {
 
 var initializeClientsServer = function(){
 	app.get(clientsEndpoint, function (req, res) {
-	  res.sendfile(__dirname + '/index.html');
-	});
+        res.sendfile(__dirname + '/index.html');
+    });
 
 	var clientServer = require("./client_server.js");
 	clientServer.initialize(io, clientsEndpoint);
