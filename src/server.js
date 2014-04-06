@@ -21,11 +21,11 @@ var initializeClientsServer = function(){
 var initializeAdminServer = function(){
     //Nie mam pojecia jak to zrobic bez tych get'ow - gdzie nie umieszcze tych resource'ow, to zawsze 404
     app.get('/bootstrap/css/bootstrap.css', function(req, res) {
-       res.sendfile(__dirname + '/bootstrap/css/bootstrap.css');
+       res.sendfile('bootstrap/css/bootstrap.css');
     });
 
     app.get('/bootstrap/css/bootstrap-theme.css', function(req, res) {
-        res.sendfile(__dirname + '/bootstrap/css/bootstrap-theme.css');
+        res.sendfile('bootstrap/css/bootstrap-theme.css');
     });
 
 	app.get(adminEndpoint, function (req, res) {

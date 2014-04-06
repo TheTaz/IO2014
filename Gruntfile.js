@@ -26,12 +26,29 @@ module.exports = function(grunt) {
                 dest: 'bin/',
                 ext: '.js'
             }
+        },
+        jshint: {
+            options: {
+                jshintrc: true
+            },
+            all: ['src/**/*.js', 'spec/**/*.js']
+        },
+        coffee_jshint: {
+            options: {},
+            source: {
+                src: 'src/**/*.coffee'
+            },
+            specs: {
+                src: 'spec/**/*.coffee'
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-coffee');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-coffee-jshint');
 
-    grunt.registerTask('default', ['clean:bin', 'copy', 'coffee', 'clean:coffee']);
+    grunt.registerTask('default', ['coffee_jshint', 'clean:bin', 'copy', 'coffee', 'clean:coffee']);
 };

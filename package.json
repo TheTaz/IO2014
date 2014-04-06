@@ -6,12 +6,16 @@
   "dependencies": {
     "express": "3.x",
     "socket.io": "0.9.x",
-    "jasmine-node": "2.0",
+    "jasmine-node": "2.0.x",
     "coffee-script": "1.7.x",
-    "grunt": "*",
-    "grunt-contrib-coffee": "*",
-    "grunt-contrib-clean": "*",
-    "grunt-contrib-copy": "*"
+    "jshint": "2.5.x",
+    "coffee-jshint": "0.0.x",
+    "grunt": "0.4.x",
+    "grunt-contrib-coffee": "0.10.x",
+    "grunt-contrib-clean": "0.5.x",
+    "grunt-contrib-copy": "0.5.x",
+    "grunt-contrib-jshint": "0.10.x",
+    "grunt-coffee-jshint": "0.2.x"
   },
   "directories": {
     "src": "./src",
