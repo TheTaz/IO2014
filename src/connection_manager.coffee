@@ -8,4 +8,6 @@ class ConnectionManager
 	connected_clients: ->
 		@sockets.clients()
 
+	send: (client, data) ->
+
 module.exports = ConnectionManager
