@@ -2,44 +2,59 @@ var app = require('express')(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server);
 
-var clientsEndpoint = "/clients";
-var adminEndpoint = "/admin";
+var Dispatcher = require('./task_dispatcher');
+var ConnectionManager = require('./connection_manager');
+
+var tasks = require('./tasks');
+
+var clientsEndpoint = '/clients';
+var clientsIO = io.of(clientsEndpoint);
+
+var adminEndpoint = '/admin';
 
 var initializeServer = function() {
-	server.listen(3000);
-}
+    server.listen(3000);
+};
 
-var initializeClientsServer = function(){
-	app.get(clientsEndpoint, function (req, res) {
-        res.sendfile(__dirname + '/index.html');
-    });
+var initializeClientsServer = function() {
+  app.get(clientsEndpoint, function(req, res) {
+    res.sendfile(__dirname + '/index.html');
+  });
 
-	var clientServer = require("./client_server.js");
-	clientServer.initialize(io, clientsEndpoint);
-}
+  var ClientServer = require('./client_server');
+  var dispatcher = new Dispatcher();
+  var connectionManager = new ConnectionManager(clientsIO);
 
-var initializeAdminServer = function(){
-    //Nie mam pojecia jak to zrobic bez tych get'ow - gdzie nie umieszcze tych resource'ow, to zawsze 404
-    app.get('/bootstrap/css/bootstrap.css', function(req, res) {
-       res.sendfile('bootstrap/css/bootstrap.css');
-    });
+  return new ClientServer(dispatcher, connectionManager);
+};
 
-    app.get('/bootstrap/css/bootstrap-theme.css', function(req, res) {
-        res.sendfile('bootstrap/css/bootstrap-theme.css');
-    });
+var initializeAdminServer = function() {
+  app.get('/bootstrap/css/bootstrap.css', function(req, res) {
+    res.sendfile('bootstrap/css/bootstrap.css');
+  });
 
-	app.get(adminEndpoint, function (req, res) {
-		res.sendfile(__dirname + '/admin_panel.html');
-	});
+  app.get('/bootstrap/css/bootstrap-theme.css', function(req, res) {
+    res.sendfile('bootstrap/css/bootstrap-theme.css');
+  });
 
-	var adminServer = require("./admin_server.js");
-	adminServer.initialize(io, adminEndpoint);
-}
+  app.get(adminEndpoint, function(req, res) {
+    res.sendfile(__dirname + '/admin_panel.html');
+  });
 
-var initialize = function(){
-	initializeServer();
-	initializeAdminServer();
-	initializeClientsServer();
-}
+  var adminServer = require('./admin_server');
+  adminServer.initialize(io, adminEndpoint);
+};
+
+var initialize = function() {
+  initializeServer();
+  initializeAdminServer();
+  var clientServer = initializeClientsServer();
+
+  clientsIO.on('connection', function() {
+    if (clientsIO.clients().length === 3) {
+      clientServer.dispatchTask(tasks.findPrimesInRange, 1, 1000);
+    }
+  });
+};
 
 initialize();

@@ -50,5 +50,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-coffee-jshint');
 
-    grunt.registerTask('default', ['coffee_jshint', 'clean:bin', 'copy', 'coffee', 'clean:coffee']);
+    grunt.registerTask('default', ['jshint', 'clean:bin', 'copy', 'coffee', 'clean:coffee']);
 };
