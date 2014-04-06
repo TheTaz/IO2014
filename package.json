@@ -5,6 +5,9 @@
   "private": true,
   "dependencies": {
     "express": "3.x",
+    "socket.io": "0.9.x"
+  },
+  "devDependencies": {
     "socket.io": "0.9.x",
     "jasmine-node": "2.0.x",
     "coffee-script": "1.7.x",
@@ -24,7 +27,7 @@
     "utilities": "./utils"
   },
   "scripts": {
-    "prestart": "grunt",
+    "prestart": "node -e \"require('grunt').cli();\"",
     "start": "node ./bin/server.js",
     "test": "jasmine-node --coffee ./spec/"
   }
