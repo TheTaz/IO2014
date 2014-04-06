@@ -7,7 +7,11 @@
     "express": "3.x",
     "socket.io": "0.9.x",
     "jasmine-node": "2.0",
-    "coffee-script": "1.7.x"
+    "coffee-script": "1.7.x",
+    "grunt": "*",
+    "grunt-contrib-coffee": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-copy": "*"
   },
   "directories": {
     "src": "./src",
@@ -16,9 +20,8 @@
     "utilities": "./utils"
   },
   "scripts": {
-    "prepublish": ". ./utils/cs_to_js.sh",
-    "prestart": ". ./utils/cs_to_js.sh",
+    "prestart": "grunt",
     "start": "node ./bin/server.js",
-    "test": "./node_modules/jasmine-node/bin/jasmine-node --coffee ./spec/"
+    "test": "jasmine-node --coffee ./spec/"
   }
 }

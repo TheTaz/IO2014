@@ -4,8 +4,9 @@ var initializeAdminServer = function(io, adminEndpoint) {
 
 	connectionManager.on_connection(function (socket) {
 		console.log("admin connected");
-		connectionManager.connected_clients()[connectionManager.connected_clients().length - 1].on('command', function (data) {
+		socket.on('command', function (data) {
 			console.log('command executed: ' + data);
+            socket.emit('result', 'Task completed! Result is: 3.14159265...');
 		});
 	});
 }
