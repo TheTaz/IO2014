@@ -1,11 +1,11 @@
 class ConnectionManager
 	constructor: (@sockets) ->
 
-	on_connection: ->
+	onConnection: (callback) ->
 		@sockets.on 'connection', (socket) ->
 			callback(socket)
 
-	connected_clients: ->
+	connectedClients: ->
 		@sockets.clients()
 
 module.exports = ConnectionManager
