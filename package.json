@@ -5,13 +5,15 @@
   "private": true,
   "dependencies": {
     "express": "3.x",
-    "socket.io": "0.9.x",
+    "socket.io": "0.9.x"
+  },
+  "devDependencies": {
     "jasmine-node": "2.0",
     "coffee-script": "1.7.x",
-    "grunt": "*",
-    "grunt-contrib-coffee": "*",
-    "grunt-contrib-clean": "*",
-    "grunt-contrib-copy": "*"
+    "grunt": "0.4.x",
+    "grunt-contrib-coffee": "0.10.x",
+    "grunt-contrib-clean": "0.5.x",
+    "grunt-contrib-copy": "0.5.x"
   },
   "directories": {
     "src": "./src",
@@ -20,7 +22,7 @@
     "utilities": "./utils"
   },
   "scripts": {
-    "prestart": "grunt",
+    "prestart": "node -e \"require('grunt').cli();\"",
     "start": "node ./bin/server.js",
     "test": "jasmine-node --coffee ./spec/"
   }
