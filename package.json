@@ -8,7 +8,6 @@
     "socket.io": "0.9.x"
   },
   "devDependencies": {
-    "socket.io": "0.9.x",
     "jasmine-node": "2.0.x",
     "coffee-script": "1.7.x",
     "jshint": "2.5.x",
