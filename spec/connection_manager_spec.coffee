@@ -4,10 +4,11 @@ describe "ConnectionManager", ->
     connectionManager = new ConnectionManager(sockets)
 
     it "returns list of connected clients", -> 
-        connectionManager.connected_clients()
+        connectionManager.connectedClients()
         expect(sockets.clients).toHaveBeenCalled()
 
     it "executes function on connection", ->
         callback = jasmine.createSpy 'callback'
-        connectionManager.on_connection callback
+        connectionManager.onConnection callback
         expect(sockets.on).toHaveBeenCalled()
+        # expect(callback).toHaveBeenCalled()
