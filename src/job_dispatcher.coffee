@@ -1,4 +1,3 @@
-
 class JobDispatcher
 	constructor: (@connectionManager)->
 
