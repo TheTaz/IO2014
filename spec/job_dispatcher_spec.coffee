@@ -5,6 +5,5 @@ describe "JobDispatcher", ->
 
 	it "connects with connection manager to retrieve clients and assign task", ->
 	
-		jobDispatcher.dispatchTask [1, 2, 3], (params) -> [[1],[2,3]]
+		jobDispatcher.dispatchTask [1, 2, 3], (params, n) -> [[1],[2,3]]
 		expect(connectionManager.connectedClients).toHaveBeenCalled
-		expect(connectionManager.assignTaskParamsToClient).toHaveBeenCalled

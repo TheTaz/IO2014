@@ -13,6 +13,9 @@ class TaskManager
     @tasks.push
       id: @newTaskId()
       task: taskObj
-    # will send appropriate parts of the task to dispatcher and injector
+
+    @injector.inject(@lastTaskId, taskObj.taskProcess)
+    @dispatcher.dispatchTask(@lastTaskId, taskObj.taskParams, taskObj.taskSplit)
+    # should create a result aggregator that will wait for tasks to finish
 
 module.exports = TaskManager
