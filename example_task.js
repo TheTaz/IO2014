@@ -12,6 +12,12 @@
  * Result of taskMerge: {input: null, output: TaskResult}
  */
 ({
+    taskParams: {
+        number: 39916800,
+        begin: 2,
+        end: 39916800
+    },
+
     taskProcess: function(inputObj) {
         var factorials = [];
         for(var i = inputObj.begin; i < inputObj.end; ++i)
