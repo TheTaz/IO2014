@@ -1,7 +1,7 @@
 class JobDispatcher
-	constructor: (@connectionManager)->
+  constructor: (@connectionManager)->
 
-	dispatchTask: (id, taskParams, taskSplitMethod) ->
+  dispatchTask: (id, taskParams, taskSplitMethod) ->
     packageTaskParams = (id, params) ->
       type: "params"
       taskId: id
@@ -22,8 +22,8 @@ class JobDispatcher
     @clientNum = 0 if @clientNum >= clients.length
     clients[@clientNum++]
 
-	clientChoiceRuleExample: (data) ->
-		clients = @connectionManager.connectedClients()
-		return null
-		
+  clientChoiceRuleExample: (data) ->
+    clients = @connectionManager.connectedClients()
+    return null
+
 module.exports = JobDispatcher
