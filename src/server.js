@@ -12,6 +12,9 @@ var clientsIO = io.of(clientsEndpoint);
 
 var adminEndpoint = '/admin';
 
+var dispatcher = new Dispatcher();
+var connectionManager = new ConnectionManager(clientsIO);
+
 var initializeServer = function() {
   server.listen(3000);
 };
@@ -22,13 +25,10 @@ var initializeClientsServer = function() {
   });
 
   var ClientServer = require('./client_server');
-  var dispatcher = new Dispatcher();
-  var connectionManager = new ConnectionManager(clientsIO);
-
   return new ClientServer(dispatcher, connectionManager);
 };
 
-var initializeAdminServer = function() {
+var initializeAdminConsole = function() {
   app.get('/bootstrap/css/bootstrap.css', function(req, res) {
     res.sendfile('bootstrap/css/bootstrap.css');
   });
@@ -41,13 +41,13 @@ var initializeAdminServer = function() {
     res.sendfile(__dirname + '/admin_panel.html');
   });
 
-  var adminServer = require('./admin_server');
-  adminServer.initialize(io, adminEndpoint);
+  var AdminConsole = require('./admin_console');
+  return new AdminConsole(io.of(adminEndpoint), dispatcher, connectionManager);
 };
 
 var initialize = function() {
   initializeServer();
-  initializeAdminServer();
+  initializeAdminConsole();
   var clientServer = initializeClientsServer();
 
   clientsIO.on('connection', function() {
