@@ -29,7 +29,7 @@
   },
   "scripts": {
     "prestart": "node -e \"require('grunt').cli();\"",
-    "start": "node ./bin/server.js",
+    "start": "node ./bin/server",
     "test": "jasmine-node --coffee ./spec/"
   }
 }

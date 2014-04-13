@@ -9,7 +9,7 @@ class AdminConsole
       console.log 'admin connected'
       socket.on 'command', (data) ->
         task = eval data
-        #@taskManager.manage task
+        @taskManager.manage task
         console.log 'command executed: ' + data
         socket.emit('result', 'Task completed! Result is: 3.14159265...')
 
