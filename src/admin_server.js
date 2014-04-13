@@ -1,8 +1,11 @@
 var initializeAdminServer = function(io, adminEndpoint) {
   var ConnectionManager = require('./connection_manager');
   var connectionManager = new ConnectionManager(io.of(adminEndpoint));
+  var JobDispatcher = require('./job_dispatcher');
+  var JsInjector = require('./js_injector');
   var TaskManager = require('./task_manager');
-  var taskManager = new TaskManager();
+
+  var taskManager = new TaskManager(new JobDispatcher(connectionManager), new JsInjector(connectionManager));
 
   connectionManager.onConnection(function(socket) {
     console.log('admin connected');

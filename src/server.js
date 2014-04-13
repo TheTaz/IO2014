@@ -13,7 +13,7 @@ var clientsIO = io.of(clientsEndpoint);
 var adminEndpoint = '/admin';
 
 var initializeServer = function() {
-    server.listen(3000);
+  server.listen(3000);
 };
 
 var initializeClientsServer = function() {
