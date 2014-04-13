@@ -1,3 +1,8 @@
+###*
+# js_injector class.
+# @class js_injector
+###
+
 class JsInjector
   constructor: (@connectionManager) ->
 

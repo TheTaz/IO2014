@@ -4,6 +4,9 @@
 # binaries dir
 /bin
 
+#documentation
+/docs
+
 # logs
 *.log
 .idea/
