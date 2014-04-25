@@ -1,13 +1,23 @@
 class ConnectionManager
 	constructor: (@sockets) ->
 
-	onConnection: (callback) ->
+	onPeerConnected: (callback) ->
 		@sockets.on 'connection', (socket) ->
 			callback(socket)
 
-	connectedClients: ->
-		@sockets.clients()
+	onPeerDisconnected: (callback) ->
+		@sockets.on 'disconnect', (socket) ->
+			callback(socket)
 
-	send: (client, data) ->
+	onCodeLoaded: (callback) ->
+		@sockets.on 'code_loaded', (socket, message) ->
+			callback(socket, message)
+
+	onResultReady: (callback) ->
+		@sockets.on 'result_ready', (socket, message) ->
+			callback(socket, message)
+
+	getActiveConnections: ->
+		return @sockets.clients()
 
 module.exports = ConnectionManager
