@@ -6,7 +6,7 @@ io = require('socket.io').listen(server)
 Dispatcher = require './task_dispatcher'
 ConnectionManager = require './connection_manager'
 
-tasks = require './tasks'
+#tasks = require './tasks'
 
 clientsEndpoint = '/client'
 adminEndpoint = '/admin'
@@ -34,8 +34,8 @@ initialize = () ->
   initializeAdminConsole()
   clientServer = initializeClientsServer()
 
-  clientsIO.on 'connection', () ->
-    if(clientsIO.clients().length is 3)
-      clientServer.dispatchTask tasks.findPrimesInRange, 1, 1000
+#  clientsIO.on 'connection', () ->
+#    if(clientsIO.clients().length is 3)
+#      clientServer.dispatchTask tasks.findPrimesInRange, 1, 1000
 
 initialize()
