@@ -1,6 +1,6 @@
 class ClientServer
 	constructor: (@dispatcher, @connectionManager) ->
-		@connectionManager.onConnection (socket) ->
+		@connectionManager.onPeerConnected (socket) ->
 			console.log("New user connected")
 
 
@@ -8,6 +8,6 @@ class ClientServer
 			console.log "Results arrived: " + JSON.stringify(result)
 
 	dispatchTask: (func, left, right) ->
-		@dispatcher.dispatchTask func, left, right, @connectionManager.connectedClients()
+		@dispatcher.dispatchTask func, left, right, @connectionManager.getActiveConnections()
 
 module.exports = ClientServer

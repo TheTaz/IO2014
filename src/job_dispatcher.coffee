@@ -7,7 +7,7 @@ class JobDispatcher
       taskId: id
       params: params
 
-    clients = @connectionManager.connectedClients()
+    clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
 
     splitParams = taskSplitMethod(taskParams, clients.length)
@@ -15,7 +15,7 @@ class JobDispatcher
     @connectionManager.send(@getNextClient(), d) for d in data
 
   getNextClient: ->
-    clients = @connectionManager.connectedClients()
+    clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
 
     @clientNum = @clientNum ? 0
@@ -23,7 +23,7 @@ class JobDispatcher
     clients[@clientNum++]
 
   clientChoiceRuleExample: (data) ->
-    clients = @connectionManager.connectedClients()
+    clients = @connectionManager.getActiveConnections()
     return null
 
 module.exports = JobDispatcher

@@ -6,9 +6,9 @@ var initializeAdminServer = function(io, adminEndpoint) {
     var TaskManager = require("./task_manager.js");
 
     var taskManager = new TaskManager(new JobDispatcher(connectionManager),
-                                      new JsInjector(connectionManager));
+        new JsInjector(connectionManager));
 
-    connectionManager.onConnection(function(socket) {
+    connectionManager.onPeerConnected(function(socket) {
         console.log("admin connected");
         socket.on('command', function(data) {
             var task = eval(data); // todo: error handling

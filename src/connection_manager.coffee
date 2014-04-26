@@ -7,13 +7,15 @@ class ConnectionManager
 	onPeerDisconnected: (callback) ->
 		@sockets.on 'disconnect', callback
 
+	# TODO : document callback and test it somehow
 	onCodeLoaded: (callback) ->
 		@sockets.on 'code_loaded', callback
 
 	onResultReady: (callback) ->
 		@sockets.on 'result_ready', callback
 
+	# TODO : wrap up clients in a class allowing for custom events
 	getActiveConnections: ->
-		return @sockets.clients()
+		@sockets.clients()
 
 module.exports = ConnectionManager
