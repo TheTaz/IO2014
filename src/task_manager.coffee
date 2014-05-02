@@ -1,21 +1,89 @@
 events = require('events');
 
-class TaskManager
-  constructor: (@dispatcher, @injector) ->
+class TaskManager extends events.EventEmitter
+  TaskStatus =
+    new: 0
+    running: 1
+    done: 2
+    removed: 3
+
+  constructor: (@dispatcher, @injector, @resultAgregator) ->
     events.EventEmitter.call this
-    @tasks = []
+    @on 'task_state_change', @taskStateChangeCallback
+    @tasks = {}
+
+
+  ## API methods
+
+  addTask: (taskObj) ->
+    taskId = @newTaskId()
+
+    console.log "TaskParams: ", taskObj.taskParams
+
+    return false if not taskObj.taskParams?
+
+    return false if not typeof taskObj.taskProcess       == 'function'
+    return false if not typeof taskObj.taskSplit         == 'function'
+    return false if not typeof taskObj.taskMerge         == 'function'
+    return false if not typeof taskObj.taskResultEquals  == 'function'
+
+    @tasks[taskId] = taskObj
+    @tasks[taskId]['taskId'] = taskId
+    @setTaskStatus taskId, TaskStatus.new
+
+    console.log "New task ID: ", taskId
+
+    return taskId
+
+
+  startTask: (taskId) ->
+    task = @tasks[taskId]
+    return false if not task?
+
+    @resultAgregator.aggregateOn taskId, task.taskMerge
+    @injector.injectCode taskId, task.taskProcess
+    @dispatcher.dispatchTask taskId, task.taskParams, task.taskSplit
+
+    @setTaskStatus taskId, TaskStatus.running
+    console.log task
+
+    return true
+
+
+  removeTask: (taskId) ->
+    @tasks[taskId] = null
+
+    @injector.unloadCode taskId
+    @resultAgregator.forgetTask taskId
+    @dispatcher.stopTask taskId
+
+    @setTaskStatus taskId, TaskStatus.removed
+
+
+  getTaskState: (taskId) ->
+    @tasks[taskId]['state']
+
+
+  ## Internal methods
 
   newTaskId: ->
-    @lastTaskId = @lastTaskId ? 0
+    @lastTaskId = @lastTaskId ? 1
     ++@lastTaskId
 
-  manage: (taskObj) ->
-    @tasks.push
-      id: @newTaskId()
-      task: taskObj
+  setTaskStatus: (taskId, newState) ->
+    task = @tasks[taskId]
+    return false if not task?
 
-    @injector.inject(@lastTaskId, taskObj.taskProcess)
-    @dispatcher.dispatchTask(@lastTaskId, taskObj.taskParams, taskObj.taskSplit)
-    # should create a result aggregator that will wait for tasks to finish
+    oldState = task["state"]
+    task["state"] = newState
+
+    @emit 'task_state_change', taskId, oldState, newState
+
+    return true
+
+
+  taskStateChangeCallback: (taskId, oldState, newState) ->
+    console.log "onTaskStateChange(", taskId, ", ", oldState, ", ", newState, ")"
+    return true
 
 module.exports = TaskManager

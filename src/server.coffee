@@ -3,7 +3,7 @@ app = express()
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
-#Dispatcher = require './task_dispatcher'
+JobDispatcher = require './job_dispatcher'
 ConnectionManager = require './connection_manager'
 
 #tasks = require './tasks'
@@ -14,8 +14,8 @@ adminEndpoint = '/admin'
 clientsIO = io.of clientsEndpoint
 adminIO = io.of adminEndpoint
 
-dispatcher = null
 connectionManager = new ConnectionManager(clientsIO)
+dispatcher = new JobDispatcher(connectionManager)
 
 initializeServer = () ->
   app.use(express.static('./public'))
