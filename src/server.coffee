@@ -22,7 +22,7 @@ initializeServer = () ->
 
 initializeClientsServer = () ->
   ClientServer = require './client_server'
-  new ClientServer(dispatcher, connectionManager)
+  new ClientServer(connectionManager)
 
 initializeAdminConsole = () ->
   AdminConsole = require './admin_console'

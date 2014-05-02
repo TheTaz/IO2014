@@ -1,5 +1,5 @@
 class ClientServer
-	constructor: (@dispatcher, @connectionManager) ->
+	constructor: (@connectionManager) ->
 		@connectionManager.onPeerConnected (socket) ->
 			console.log("New user connected")
 
