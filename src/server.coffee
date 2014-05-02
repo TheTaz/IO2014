@@ -6,8 +6,6 @@ io = require('socket.io').listen(server)
 Dispatcher = require './task_dispatcher'
 ConnectionManager = require './connection_manager'
 
-#tasks = require './tasks'
-
 clientsEndpoint = '/client'
 adminEndpoint = '/admin'
 
@@ -21,21 +19,23 @@ initializeServer = () ->
   app.use(express.static('./public'))
   server.listen 3000
 
-initializeClientsServer = () ->
+initializeClientsServer = ->
   ClientServer = require './client_server'
   new ClientServer(dispatcher, connectionManager)
 
-initializeAdminConsole = () ->
+initializeAdminConsole = ->
   AdminConsole = require './admin_console'
   new AdminConsole(adminIO, dispatcher, connectionManager)
 
-initialize = () ->
-  initializeServer()
-  initializeAdminConsole()
-  clientServer = initializeClientsServer()
+initialize = ->
+	initializeServer()
+	initializeAdminConsole()
+	clientServer = initializeClientsServer()
 
-#  clientsIO.on 'connection', () ->
-#    if(clientsIO.clients().length is 3)
-#      clientServer.dispatchTask tasks.findPrimesInRange, 1, 1000
+	# both tasks and dispatcher should be replaced by proper modules
+	tasks = require './tasks'
+	clientsIO.on 'connection', () ->
+		if(clientsIO.clients().length is 3)
+			clientServer.dispatchTask tasks.findPrimesInRange, 1, 1000
 
 initialize()
