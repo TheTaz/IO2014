@@ -19,8 +19,6 @@ class TaskManager extends events.EventEmitter
   addTask: (taskObj) ->
     taskId = @newTaskId()
 
-    console.log "TaskParams: ", taskObj.taskParams
-
     return false if not taskObj.taskParams?
 
     return false if not typeof taskObj.taskProcess       == 'function'
@@ -31,8 +29,6 @@ class TaskManager extends events.EventEmitter
     @tasks[taskId] = taskObj
     @tasks[taskId]['taskId'] = taskId
     @setTaskStatus taskId, @TaskStatus.new
-
-    console.log "New task ID: ", taskId
 
     return taskId
 
@@ -46,7 +42,6 @@ class TaskManager extends events.EventEmitter
     @dispatcher.dispatchTask taskId, task.taskParams, task.taskSplit
 
     @setTaskStatus taskId, @TaskStatus.running
-    console.log task
 
     return true
 
@@ -90,7 +85,6 @@ class TaskManager extends events.EventEmitter
 
 
   taskStateChangeCallback: (taskId, oldState, newState) ->
-    console.log "onTaskStateChange(", taskId, ", ", oldState, ", ", newState, ")"
     return true
 
 module.exports = TaskManager
