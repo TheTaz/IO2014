@@ -12,17 +12,18 @@ describe "TaskManager", ->
 
 
   beforeEach ->
-    @jsInjector = jasmine.createSpyObj("jsInjector", ["inject"])
-    @jobDispatcher = jasmine.createSpyObj("jobDispatcher", ["dispatchTask"])
-    @taskManager = new TaskManager(@jobDispatcher, @jsInjector)
+    @jsInjector = jasmine.createSpyObj("jsInjector", ["injectCode", "unloadCode"])
+    @jobDispatcher = jasmine.createSpyObj("JobDispatcher", ["dispatchTask", "stopTask"])
+    @resultAggregator = jasmine.createSpyObj("ResultAggregator", ["aggregateOne", "forgetTask"])
+    @taskManager = new TaskManager(@jobDispatcher, @jsInjector, @resultAggregator)
 
 
-  it "manages tasks", ->
-    @taskManager.manage dummyTask
+  it "adds tasks", ->
+    taskId = @taskManager.addTask dummyTask
 
-    expect(@taskManager.tasks).toContain
-      id: @taskManager.lastTaskId
-      task: dummyTask
+    expect(@taskManager.tasks[taskId]).toContain
+      taskId: @taskManager.lastTaskId
+      taskProcess: dummyTask.taskProcess
 
 
   it "creates a new id for each task", ->
