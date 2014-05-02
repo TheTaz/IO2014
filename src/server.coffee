@@ -20,9 +20,9 @@ initializeServer = () ->
   app.use(express.static('./public'))
   server.listen 3000
 
-initializeClientsServer = () ->
-  ClientServer = require './client_server'
-  new ClientServer(connectionManager)
+initializeConnectionManager = () ->
+  connectionManager.onPeerConnected (socket) ->
+    console.log("New user connected")
 
 initializeAdminConsole = () ->
   AdminConsole = require './admin_console'
@@ -31,10 +31,6 @@ initializeAdminConsole = () ->
 initialize = () ->
   initializeServer()
   initializeAdminConsole()
-  clientServer = initializeClientsServer()
-
-#  clientsIO.on 'connection', () ->
-#    if(clientsIO.clients().length is 3)
-#      clientServer.dispatchTask tasks.findPrimesInRange, 1, 1000
+  initializeConnectionManager()
 
 initialize()
