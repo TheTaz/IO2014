@@ -1,13 +1,14 @@
 events = require('events');
 
 class TaskManager extends events.EventEmitter
-  TaskStatus =
+
+  TaskStatus:
     new: 0
     running: 1
     done: 2
     removed: 3
 
-  constructor: (@dispatcher, @injector, @resultAgregator) ->
+  constructor: (@dispatcher, @injector, @resultAggregator) ->
     events.EventEmitter.call this
     @on 'task_state_change', @taskStateChangeCallback
     @tasks = {}
@@ -29,7 +30,7 @@ class TaskManager extends events.EventEmitter
 
     @tasks[taskId] = taskObj
     @tasks[taskId]['taskId'] = taskId
-    @setTaskStatus taskId, TaskStatus.new
+    @setTaskStatus taskId, @TaskStatus.new
 
     console.log "New task ID: ", taskId
 
@@ -40,11 +41,11 @@ class TaskManager extends events.EventEmitter
     task = @tasks[taskId]
     return false if not task?
 
-    @resultAgregator.aggregateOn taskId, task.taskMerge
+    @resultAggregator.aggregateOn taskId, task.taskMerge
     @injector.injectCode taskId, task.taskProcess
     @dispatcher.dispatchTask taskId, task.taskParams, task.taskSplit
 
-    @setTaskStatus taskId, TaskStatus.running
+    @setTaskStatus taskId, @TaskStatus.running
     console.log task
 
     return true
@@ -54,28 +55,34 @@ class TaskManager extends events.EventEmitter
     @tasks[taskId] = null
 
     @injector.unloadCode taskId
-    @resultAgregator.forgetTask taskId
+    @resultAggregator.forgetTask taskId
     @dispatcher.stopTask taskId
 
-    @setTaskStatus taskId, TaskStatus.removed
+    @setTaskStatus taskId, @TaskStatus.removed
 
 
   getTaskState: (taskId) ->
-    @tasks[taskId]['state']
+    return null if not @tasks[taskId]?
+
+    {
+      status: @tasks[taskId]['status'],
+      currentResult: @resultAggregator.getCurrentResult(taskId)
+    }
+
 
 
   ## Internal methods
 
   newTaskId: ->
-    @lastTaskId = @lastTaskId ? 1
+    @lastTaskId = @lastTaskId ? 0
     ++@lastTaskId
 
   setTaskStatus: (taskId, newState) ->
     task = @tasks[taskId]
     return false if not task?
 
-    oldState = task["state"]
-    task["state"] = newState
+    oldState = task["status"]
+    task["status"] = newState
 
     @emit 'task_state_change', taskId, oldState, newState
 

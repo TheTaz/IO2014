@@ -16,4 +16,8 @@ class ResultAggregator
       taskMergeFun: mergeFun,
       partialResults: {}
 
+  getCurrentResult: (taskId) ->
+    # Stub method
+    null
+
 module.exports = ResultAggregator
