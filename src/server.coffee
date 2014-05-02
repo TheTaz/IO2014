@@ -3,7 +3,7 @@ app = express()
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
-Dispatcher = require './task_dispatcher'
+Dispatcher = require './job_dispatcher'
 ConnectionManager = require './connection_manager'
 
 #tasks = require './tasks'
