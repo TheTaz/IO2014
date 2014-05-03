@@ -20,13 +20,16 @@ class AdminConsole
           console.log "Invalid data: ", data
           return
 
-        taskId = @taskManager.addTask task
-
-        if taskId > 0
+        try
+          task.owner = socket
+          taskId = @taskManager.addTask task
           @taskManager.startTask taskId
           console.log 'command executed: ' + data
           socket.emit('result', 'Task started!')
-        else
+        catch err
+          console.log "Failed to add task:", task
+          console.log "Cannot add task due to:", err
           socket.emit('result', 'Invalid task!')
+
 
 module.exports = AdminConsole

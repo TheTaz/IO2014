@@ -50,20 +50,28 @@ class TaskManager extends events.EventEmitter
   # nor initializes it.
   # @method addTask
   # @param {Object} taskObj Structure of the task's object shall be same as in example_task.js
-  # @return {Integer} new task ID or false if taskObj is not valid Task Object
+  # @return {Integer} new task ID. throws {Error} when task object is invalid
   ###
   addTask: (taskObj) ->
     taskId = @newTaskId()
 
-    return false if not taskObj.taskParams?
+    if not taskObj.taskParams?
+      throw new Error("Invalid taskParams object")
 
-    return false if not typeof taskObj.taskProcess       == 'function'
-    return false if not typeof taskObj.taskSplit         == 'function'
-    return false if not typeof taskObj.taskMerge         == 'function'
-    return false if not typeof taskObj.taskResultEquals  == 'function'
+    if typeof taskObj.taskProcess != 'function'
+      throw new Error("Invalid taskProcess function")
+
+    if typeof taskObj.taskSplit != 'function'
+      throw new Error("Invalid taskSplit function")
+
+    if typeof taskObj.taskMerge != 'function'
+      throw new Error("Invalid taskMerge function")
+
+    if typeof taskObj.taskResultEquals != 'function'
+      throw new Error("Invalid taskResultEquals function")
 
     @tasks[taskId] = taskObj
-    @tasks[taskId]['taskId'] = taskId
+    @tasks[taskId].taskId = taskId
     @setTaskStatus taskId, @TaskStatus.new
 
     return taskId
@@ -94,7 +102,7 @@ class TaskManager extends events.EventEmitter
   # @param {Integer} taskId ID of the task that was returned by @addTask method
   ###
   removeTask: (taskId) ->
-    @tasks[taskId] = null
+    delete @tasks[taskId]
 
     @injector.unloadCode taskId
     @resultAggregator.forgetTask taskId
@@ -114,7 +122,7 @@ class TaskManager extends events.EventEmitter
     return null if not @tasks[taskId]?
 
     {
-      status: @tasks[taskId]['status'],
+      status: @tasks[taskId].status,
       currentResult: @resultAggregator.getCurrentResult(taskId)
     }
 
@@ -130,8 +138,8 @@ class TaskManager extends events.EventEmitter
     task = @tasks[taskId]
     return false if not task?
 
-    oldStatus = task["status"]
-    task["status"] = newStatus
+    oldStatus = task.status
+    task.status = newStatus
 
     @emit 'task_state_change', taskId, oldStatus, newStatus
 
@@ -144,8 +152,26 @@ class TaskManager extends events.EventEmitter
     @lastTaskId = @lastTaskId ? 0
     ++@lastTaskId
 
-
+  ###*
+  # Callback function. This function is called every time task's status has changed.
+  # @method taskStateChangeCallback
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  # @param {TaskStatus} oldStatus old status for the task
+  # @param {TaskStatus} newStatus new status for the task
+  ###
   taskStateChangeCallback: (taskId, oldStatus, newStatus) ->
-    return true
+    task = @tasks[taskId]
+    return if not task? || not task.owner?
+
+    try
+      switch newStatus
+        when @TaskStatus.done
+          task.owner.emit('result', @getTaskState(taskId).currentResult)
+        when @TaskStatus.failed
+          task.owner.emit('result', "Task failed!")
+        when @TaskStatus.removed
+          task.owner.emit('result', "Task removed!")
+    catch err
+      console.log "Notification failed for: new task status: ", newStatus, ", task: ", taskId, " due to: ", err
 
 module.exports = TaskManager
