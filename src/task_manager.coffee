@@ -159,9 +159,15 @@ class TaskManager extends events.EventEmitter
   # @param {Integer} taskId ID of the task that was returned by @addTask method
   # @param {TaskStatus} oldStatus old status for the task
   # @param {TaskStatus} newStatus new status for the task
-  # @return {Boolean} True
   ###
   taskStateChangeCallback: (taskId, oldStatus, newStatus) ->
-    return true
+    task = @tasks[taskId]
+    return if not task? || not task.owner?
+
+    switch newStatus
+      when @TaskStatus.done
+        task.owner.emit('result', @getTaskState(taskId).currentResult)
+      when @TaskStatus.failed
+        task.owner.emit('result', "Task failed!")
 
 module.exports = TaskManager

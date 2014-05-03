@@ -21,6 +21,7 @@ class AdminConsole
           return
 
         try
+          task.owner = socket
           taskId = @taskManager.addTask task
           @taskManager.startTask taskId
           console.log 'command executed: ' + data
