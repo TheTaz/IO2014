@@ -152,20 +152,21 @@ class Client
 
     if not task?
       console.log 'Cannot execute task, it doesn\'t exist'
-      @socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } })
+      @socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: taskId } })
       return
 
     console.log 'Executing task: ' + taskId
     console.log 'Task code: ' + task.task
     console.log 'Job arguments: ' + jobArgs
-    result = eval(task.task).taskProcess jobArgs
-    task.results[jobId] = result
-    console.log 'Result is: ' + result
-
-    @socket.emit('ack', { msgId: operation.msgId})
-
-    @returnResult(operation, result)
-
+    try
+      result = eval(task.task).taskProcess jobArgs
+      task.results[jobId] = result
+      console.log 'Result is: ' + result
+      @socket.emit('ack', { msgId: operation.msgId})
+      @returnResult(operation, result)
+    catch error
+      @socket.emit('error', { error: 2, msgId: operation.msgId, details: { taskId: taskId, jobId: jobId, reason: error } })
+    
   ###*
   # Handles job result sending.
   # Schedules a check for acknowledgement.
