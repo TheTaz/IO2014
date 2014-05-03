@@ -154,7 +154,6 @@ class TaskManager extends events.EventEmitter
 
   ###*
   # Callback function. This function is called every time task's status has changed.
-  # @todo implement this method (notify to admin console etc.)
   # @method taskStateChangeCallback
   # @param {Integer} taskId ID of the task that was returned by @addTask method
   # @param {TaskStatus} oldStatus old status for the task
