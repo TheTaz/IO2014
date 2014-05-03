@@ -22,18 +22,21 @@ initializeServer = () ->
 
 initializeConnectionManager = () ->
   connectionManager.onPeerConnected (socket) ->
-  	console.log("New user connected")
+    console.log("New user connected")
 
-  	socket.on "ack", (data) ->
-  		console.log("Client accepted msgId: " + data.msgId)
+    msgId = 0;
 
-  	socket.on "jobResult", (data) ->
-  		console.log("Received response: " + data.data.jobResult)
-  	
-  	socket.emit("operation", {opcode: 1, msgId: 1, data: { taskId: 1, runFun: "({taskProcess: function(inputObj) { return [inputObj.number, inputObj.begin, inputObj.end]}})" } })
-  	#socket.emit("operation", {opcode: 2, msgId: 2, data: { taskId: 1 } })
-  	socket.emit("operation", {opcode: 3, msgId: 2, data: { taskId: 1, jobId: 1, jobArgs: { number: 999999, begin: 2, end: 999999 } } })
+    socket.on 'ack', (payload) ->
+      console.log('Got acknowledgment of msg ' + payload.msgId)
+      if(payload.msgId is msgId)
+        connectionManager.executeJobOnPeer(socket, 1, 1, { number: 999999, begin: 2, end: 999999 })
+      
+    socket.on 'result', (payload) ->
+      console.log('Got result: ' + payload.data.jobResult)
+      connectionManager.deleteTaskFromPeer(socket, 1)
 
+    msgId = connectionManager.sendNewTaskToPeer(socket, 1, "({taskProcess: function(inputObj) { return [inputObj.number, inputObj.begin, inputObj.end]}})")   
+    
 
 initializeAdminConsole = () ->
   AdminConsole = require './admin_console'
