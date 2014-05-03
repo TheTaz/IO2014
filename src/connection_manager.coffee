@@ -1,8 +1,11 @@
+events = require('events');
+
+
 ###*
 # ConnectionManager class.
 # @class ConnectionManager
 ###
-class ConnectionManager
+class ConnectionManager extends events.EventEmitter
   constructor: (@sockets) ->
 
   ###*

@@ -6,6 +6,7 @@
 class ResultAggregator
 
   constructor: (@jobDispatcher) ->
+    events.EventEmitter.call this
     @results = {}
 
   ###*
@@ -14,7 +15,6 @@ class ResultAggregator
   # @param {Integer} taskId identifier of the task to be forgotten
   ###
   forgetTask: (taskId) ->
-    # Stub method
     @results[taskId] = null
 
   ###*
