@@ -16,6 +16,10 @@ class ConnectionManager
 
 	# TODO : wrap up clients in a class allowing for custom events
 	getActiveConnections: ->
-		@sockets.clients()
+    @sockets.clients()
+
+  send: (client, data) ->
+    # Stub method
+    console.log "ConnectionManager:send(", client, ",", data , ")"
 
 module.exports = ConnectionManager

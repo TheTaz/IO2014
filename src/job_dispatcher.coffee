@@ -14,6 +14,10 @@ class JobDispatcher
     data = (packageTaskParams(id, params) for params in splitParams)
     @connectionManager.send(@getNextClient(), d) for d in data
 
+  stopTask: (taskId) ->
+    # Stub method
+    console.log "Stopping task: ", taskId
+
   getNextClient: ->
     clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
