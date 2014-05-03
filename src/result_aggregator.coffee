@@ -1,3 +1,6 @@
+events = require('events');
+
+
 ###*
 # @class ResultAggregator
 # @constructor  
@@ -9,7 +12,7 @@ class ResultAggregator
     events.EventEmitter.call this
     @results = {}
 
-    @connectionManager.onResultReady (taskId, result) ->
+    @connectionManager.onResultReady (taskId, result) =>
       @results[taskId].partialResults << result
 
   ###*
@@ -38,8 +41,9 @@ class ResultAggregator
   # @return partial results and merged result for specified task
   ###
   getCurrentResult: (taskId) ->
-    partialResults: @results[taskId].partialResults,
-    mergedResult: @results[taskId].taskMergeFun(@results[taskId].partialResults)
+    if @results[taskId]
+      partialResults: @results[taskId].partialResults,
+      mergedResult: @results[taskId].taskMergeFun(@results[taskId].partialResults)
 
 
 module.exports = ResultAggregator
