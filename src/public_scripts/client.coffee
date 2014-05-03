@@ -1,88 +1,146 @@
+###*
+# This script runs in web browser, when client opens client.html
+# @module client
+###
+
 console.log 'Client script loaded, connecting to server...'
 
-clientEndpoint = 'http://localhost/client'
+###*
+# Client class
+# @class Client
+# @module client
+###
+class Client
+	constructor: () ->
 
-socket = io.connect clientEndpoint
-lastServerMsgId = 0
-lastClientMsgId = 0
-tasks = {}
+		###*
+		#	Address for client to connect to server websocket
+		# @property clientEndpoint
+		# @type String
+		###
+		@clientEndpoint = 'http://localhost/client'
 
-#tasks = { 1: { task: '{ ... }' , results: { 1: ..., 2: ... } }, 2: { ... } }
+		###*
+		# Socket handling the connection to the server
+		# @property socket
+		# @type Object
+		###
+		@socket = io.connect @clientEndpoint
 
-socket.on 'operation', (operation) ->
-	console.log 'Received control message with operation code: ' + operation.opcode
+		###*
+		# Value defining id of the last operation sent by the server
+		# @property lastServerMsgId
+		# @type Integer
+		###
+		@lastServerMsgId = 0
 
-	#TODO: Is this check needed?
-	if lastServerMsgId + 1 isnt operation.msgId
-		console.log 'Synchronization error, last message id was: ' + lastServerMsgId +  ' while current is: ' + operation.msgId
-		socket.emit('error', { error: 4, msgId: i, details: { reason: 'Did not receive operation' } }) for i in [(lastServerMsgId + 1)..(operation.msgId)]
+		###*
+		# Value defining id of the last operation sent by the client
+		# @property lastClientMsgId
+		# @type Integer
+		###
+		@lastClientMsgId = 0
 
-	lastServerMsgId = operation.msgId
+		###*
+		#	Local object containing saved tasks and their results (if any exist)
+		# Object has the following format:
+		# {
+		#		1: { 
+		#			task: '({ ... })', 
+		#			results: { 
+		#				1: [ ... ], 
+		#				2: [ ... ] 
+		#			} 
+		#		}, 
+		#		2: { 
+		#			... 
+		#		} 
+		#	}
+		# @property tasks
+		# @type Object
+		###
+		@tasks = {}
 
-	switch operation.opcode
-		when 1
-			#Add new task code,
+		###*
+		#	Event listener that listenes for a new operation from the server
+		# @event operation
+		# @param operation details of the operation sent from the server
+		###
+		@socket.on 'operation', (operation) =>
+			console.log 'Received control message with operation code: ' + operation.opcode
 
-			console.log operation.data.runFun
-			console.log typeof operation.data.runFun
+			#TODO: Is this check needed?
+			if @lastServerMsgId + 1 isnt operation.msgId
+				console.log 'Synchronization error, last message id was: ' + @lastServerMsgId +  ' while current is: ' + operation.msgId
+				@socket.emit('error', { error: 4, msgId: i, details: { reason: 'Did not receive operation' } }) for i in [(@lastServerMsgId + 1)..(operation.msgId)]
 
-			if operation.data.runFun instanceof String or typeof operation.data.runFun is 'string'
-				taskId = operation.data.taskId
-				tasks[taskId] = {}
-				tasks[taskId].task = operation.data.runFun
-				tasks[taskId].results = {}
-				console.log 'Added new task: ' + tasks[taskId].task
-				socket.emit('ack', { ack: true, msgId: operation.msgId})
-			else 
-				console.log 'No task function provided'
-				socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } });
+			@lastServerMsgId = operation.msgId
 
-		when 2
-			#Delete task code
+			switch operation.opcode
+				when 1
+					#Add new task code,
 
-			taskId = operation.data.taskId
+					console.log operation.data.runFun
+					console.log typeof operation.data.runFun
 
-			#TODO: Fire-and-forget call, or notify server that taskId was already removed?
-			delete tasks[taskId]
-			console.log 'Deleted task: ' + taskId
-			socket.emit('ack', { ack: true, msgId: operation.msgId})
+					if operation.data.runFun instanceof String or typeof operation.data.runFun is 'string'
+						taskId = operation.data.taskId
+						@tasks[taskId] = {}
+						@tasks[taskId].task = operation.data.runFun
+						@tasks[taskId].results = {}
+						console.log 'Added new task: ' + @tasks[taskId].task
+						@socket.emit('ack', { ack: true, msgId: operation.msgId})
+					else 
+						console.log 'No task function provided'
+						@socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } });
 
-		when 3
-			#Execute job (task fragment)
+				when 2
+					#Delete task code
 
-			taskId = operation.data.taskId
-			jobId = operation.data.jobId
-			jobArgs = operation.data.jobArgs
+					taskId = operation.data.taskId
 
-			task = tasks[taskId]
+					#TODO: Fire-and-forget call, or notify server that taskId was already removed?
+					delete @tasks[taskId]
+					console.log 'Deleted task: ' + taskId
+					@socket.emit('ack', { ack: true, msgId: operation.msgId})
 
-			if not task?
-				console.log 'Cannot execute task, it doesn\'t exist'
-				socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } })
-				break
+				when 3
+					#Execute job (task fragment)
 
-			console.log 'Executing task: ' + taskId
-			console.log 'Task code: ' + task.task
-			console.log 'Job arguments: ' + jobArgs
-			result = eval(task.task).taskProcess jobArgs
-			task.results[jobId] = result
-			console.log 'Result is: ' + result
+					taskId = operation.data.taskId
+					jobId = operation.data.jobId
+					jobArgs = operation.data.jobArgs
 
-			socket.emit('ack', { ack: true, msgId: operation.msgId})
+					task = @tasks[taskId]
 
-			taskResult = { 
-				opcode: 4, 
-				msgId:  --lastClientMsgId, 
-				data: { 
-					taskId: taskId, 
-					jobId: jobId, 
-					jobResult: result
-      	}
-			}
+					if not task?
+						console.log 'Cannot execute task, it doesn\'t exist'
+						@socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } })
+						break
 
-			socket.emit('jobResult', taskResult)
+					console.log 'Executing task: ' + taskId
+					console.log 'Task code: ' + task.task
+					console.log 'Job arguments: ' + jobArgs
+					result = eval(task.task).taskProcess jobArgs
+					task.results[jobId] = result
+					console.log 'Result is: ' + result
 
-		else
-			console.log 'Unknown operation code: ' + operation.opcode
-			socket.emit('error', { error: 4, msgId: i, details: { reason: 'Unknown opcode' } })
-			
+					@socket.emit('ack', { ack: true, msgId: operation.msgId})
+
+					taskResult = { 
+						opcode: 4, 
+						msgId:  --@lastClientMsgId, 
+						data: { 
+							taskId: taskId, 
+							jobId: jobId, 
+							jobResult: result
+		      	}
+					}
+
+					@socket.emit('jobResult', taskResult)
+
+				else
+					console.log 'Unknown operation code: ' + operation.opcode
+					@socket.emit('error', { error: 4, msgId: i, details: { reason: 'Unknown opcode' } })
+
+new Client()
