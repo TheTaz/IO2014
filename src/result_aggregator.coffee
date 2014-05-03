@@ -5,9 +5,12 @@
 
 class ResultAggregator
 
-  constructor: (@jobDispatcher) ->
+  constructor: (@connectionManager) ->
     events.EventEmitter.call this
     @results = {}
+
+    @connectionManager.onResultReady (taskId, result) ->
+      @results[taskId].partialResults << result
 
   ###*
   # Forget specific task
@@ -27,14 +30,16 @@ class ResultAggregator
     # Stub methods
     @results[taskId] =
       taskMergeFun: mergeFun,
-      partialResults: {}
+      partialResults: []
 
   ###*
   # @method getCurrentResult
   # @param {Integer} taskId identifier of the task
-  # @return results for specified task
+  # @return partial results and merged result for specified task
   ###
   getCurrentResult: (taskId) ->
-    @results[taskId]
+    partialResults: @results[taskId].partialResults,
+    mergedResult: @results[taskId].taskMergeFun(@results[taskId].partialResults)
+
 
 module.exports = ResultAggregator
