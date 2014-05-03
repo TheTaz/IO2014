@@ -59,19 +59,19 @@ class TaskManager extends events.EventEmitter
       console.log "Invalid tasks initial params object for task: ", taskId
       return false
 
-    if not typeof taskObj.taskProcess == 'function'
+    if typeof taskObj.taskProcess != 'function'
       console.log "Invalid taskProcess function for task: ", taskId
       return false
 
-    if not typeof taskObj.taskSplit == 'function'
+    if typeof taskObj.taskSplit != 'function'
       console.log "Invalid taskSplit function for task: ", taskId
       return false
 
-    if not typeof taskObj.taskMerge == 'function'
+    if typeof taskObj.taskMerge != 'function'
       console.log "Invalid taskMerge function for task: ", taskId
       return false
 
-    if not typeof taskObj.taskResultEquals == 'function'
+    if typeof taskObj.taskResultEquals != 'function'
       console.log "Invalid taskResultEquals function for task: ", taskId
       return false
 
