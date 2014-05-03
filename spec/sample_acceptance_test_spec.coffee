@@ -10,14 +10,14 @@ describe "my webdriverjs tests", ->
     beforeEach ->
         client = webdriverjs.remote({
             desiredCapabilities: {
-                browserName: 'phantomjs'
+                browserName: 'chrome'
             }
         })
         client.init()
 
     it "receives token at registration", (done) ->
         client
-            .url('http://localhost:8080/api/register')
+            .url('http://localhost:3000/admin.html')
             .getText('body', (err, result) ->
                 token = result
                 expect(token.length).toBeGreaterThan(0)
