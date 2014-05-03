@@ -32,6 +32,6 @@ describe "ConnectionManager", ->
         	message = "foo"
 
         	@connectionManager.send(client, message)
-        	expect(client.send).toHaveBeenCalledWith(message)
+        	expect(client.send).toHaveBeenCalledWith(message, {})
 
 
