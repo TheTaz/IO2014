@@ -163,10 +163,15 @@ class TaskManager extends events.EventEmitter
     task = @tasks[taskId]
     return if not task? || not task.owner?
 
-    switch newStatus
-      when @TaskStatus.done
-        task.owner.emit('result', @getTaskState(taskId).currentResult)
-      when @TaskStatus.failed
-        task.owner.emit('result', "Task failed!")
+    try
+      switch newStatus
+        when @TaskStatus.done
+          task.owner.emit('result', @getTaskState(taskId).currentResult)
+        when @TaskStatus.failed
+          task.owner.emit('result', "Task failed!")
+        when @TaskStatus.removed
+          task.owner.emit('result', "Task removed!")
+    catch err
+      console.log "Notification failed for: new task status: ", newStatus, ", task: ", taskId, " due to: ", err
 
 module.exports = TaskManager
