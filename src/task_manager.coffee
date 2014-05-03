@@ -55,12 +55,25 @@ class TaskManager extends events.EventEmitter
   addTask: (taskObj) ->
     taskId = @newTaskId()
 
-    return false if not taskObj.taskParams?
+    if not taskObj.taskParams?
+      console.log "Invalid tasks initial params object for task: ", taskId
+      return false
 
-    return false if not typeof taskObj.taskProcess       == 'function'
-    return false if not typeof taskObj.taskSplit         == 'function'
-    return false if not typeof taskObj.taskMerge         == 'function'
-    return false if not typeof taskObj.taskResultEquals  == 'function'
+    if not typeof taskObj.taskProcess == 'function'
+      console.log "Invalid taskProcess function for task: ", taskId
+      return false
+
+    if not typeof taskObj.taskSplit == 'function'
+      console.log "Invalid taskSplit function for task: ", taskId
+      return false
+
+    if not typeof taskObj.taskMerge == 'function'
+      console.log "Invalid taskMerge function for task: ", taskId
+      return false
+
+    if not typeof taskObj.taskResultEquals == 'function'
+      console.log "Invalid taskResultEquals function for task: ", taskId
+      return false
 
     @tasks[taskId] = taskObj
     @tasks[taskId].taskId = taskId
