@@ -29,7 +29,6 @@
     "scripts": {
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
-        //"pretest": "start-selenium",
         "test": "jasmine-node --coffee ./spec/"
     }
 }
