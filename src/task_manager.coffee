@@ -63,7 +63,7 @@ class TaskManager extends events.EventEmitter
     return false if not typeof taskObj.taskResultEquals  == 'function'
 
     @tasks[taskId] = taskObj
-    @tasks[taskId]['taskId'] = taskId
+    @tasks[taskId].taskId = taskId
     @setTaskStatus taskId, @TaskStatus.new
 
     return taskId
@@ -94,7 +94,7 @@ class TaskManager extends events.EventEmitter
   # @param {Integer} taskId ID of the task that was returned by @addTask method
   ###
   removeTask: (taskId) ->
-    @tasks[taskId] = null
+    delete @tasks[taskId]
 
     @injector.unloadCode taskId
     @resultAggregator.forgetTask taskId
@@ -114,7 +114,7 @@ class TaskManager extends events.EventEmitter
     return null if not @tasks[taskId]?
 
     {
-      status: @tasks[taskId]['status'],
+      status: @tasks[taskId].status,
       currentResult: @resultAggregator.getCurrentResult(taskId)
     }
 
@@ -130,8 +130,8 @@ class TaskManager extends events.EventEmitter
     task = @tasks[taskId]
     return false if not task?
 
-    oldStatus = task["status"]
-    task["status"] = newStatus
+    oldStatus = task.status
+    task.status = newStatus
 
     @emit 'task_state_change', taskId, oldStatus, newStatus
 
@@ -144,7 +144,15 @@ class TaskManager extends events.EventEmitter
     @lastTaskId = @lastTaskId ? 0
     ++@lastTaskId
 
-
+  ###*
+  # Callback function. This function is called every time task's status has changed.
+  # @todo implement this method (notify to admin console etc.)
+  # @method taskStateChangeCallback
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  # @param {TaskStatus} oldStatus old status for the task
+  # @param {TaskStatus} newStatus new status for the task
+  # @return {Boolean} True
+  ###
   taskStateChangeCallback: (taskId, oldStatus, newStatus) ->
     return true
 

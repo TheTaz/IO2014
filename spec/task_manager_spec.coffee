@@ -25,14 +25,9 @@ describe "TaskManager", ->
 
     addedTask = @taskManager.tasks[taskId]
 
-    expect(addedTask).toBeDefined()
-    expect(addedTask.taskId           == @taskManager.lastTaskId).toBeTruthy()
-    expect(addedTask.taskProcess      == dummyTask.taskProcess).toBeTruthy()
-    expect(addedTask.taskParams       == dummyTask.taskParams).toBeTruthy()
-    expect(addedTask.taskResultEquals == dummyTask.taskResultEquals).toBeTruthy()
-    expect(addedTask.taskSplit        == dummyTask.taskSplit).toBeTruthy()
-    expect(addedTask.taskMerge        == dummyTask.taskMerge).toBeTruthy()
-    expect(addedTask.status           == TaskManager::TaskStatus.new).toBeTruthy()
+    dummyTask.taskId = @taskManager.lastTaskId
+    dummyTask.status = TaskManager::TaskStatus.new
+    expect(addedTask).toEqual dummyTask
 
 
   it "creates a new id for each task", ->
@@ -43,6 +38,7 @@ describe "TaskManager", ->
     secondId = @taskManager.lastTaskId
 
     expect(firstId).not.toBe(secondId)
+
 
   it "gets current state for the started task", ->
     taskId = @taskManager.addTask dummyTask
@@ -82,34 +78,38 @@ describe "TaskManager", ->
     @taskManager.startTask taskId
     expect(@jobDispatcher.dispatchTask).toHaveBeenCalledWith(taskId, dummyTask.taskParams, dummyTask.taskSplit)
 
+
   it "initializes result aggregator for the task", ->
     taskId = @taskManager.addTask dummyTask
     @taskManager.startTask taskId
     expect(@resultAggregator.aggregateOn).toHaveBeenCalledWith(taskId, dummyTask.taskMerge)
+
 
   it "unloads javascript code from client via JsInjector", ->
     taskId = @taskManager.addTask dummyTask
     @taskManager.removeTask taskId
     expect(@jsInjector.unloadCode).toHaveBeenCalledWith(taskId)
 
+
   it "removes jobs through JobDispatcher", ->
     taskId = @taskManager.addTask dummyTask
     @taskManager.removeTask taskId
     expect(@jobDispatcher.stopTask).toHaveBeenCalledWith(taskId)
+
 
   it "disables the task in result aggregator", ->
     taskId = @taskManager.addTask dummyTask
     @taskManager.removeTask taskId
     expect(@resultAggregator.forgetTask).toHaveBeenCalledWith(taskId)
 
+
   it "fails to get state for non-existing task", ->
     expect(@taskManager.getTaskState(@taskManager.lastTaskId + 1)).toBeNull()
+
 
   it "fails to start non-existing task", ->
     expect(@taskManager.startTask(@taskManager.lastTaskId + 1)).toBeFalsy()
 
+
   it "fails to remove for non-existing task", ->
     expect(@taskManager.removeTask(@taskManager.lastTaskId + 1)).toBeFalsy()
-
-
-
