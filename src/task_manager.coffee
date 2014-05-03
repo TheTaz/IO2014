@@ -50,30 +50,25 @@ class TaskManager extends events.EventEmitter
   # nor initializes it.
   # @method addTask
   # @param {Object} taskObj Structure of the task's object shall be same as in example_task.js
-  # @return {Integer} new task ID or false if taskObj is not valid Task Object
+  # @return {Integer} new task ID. throws {Error} when task object is invalid
   ###
   addTask: (taskObj) ->
     taskId = @newTaskId()
 
     if not taskObj.taskParams?
-      console.log "Invalid tasks initial params object for task: ", taskId
-      return false
+      throw new Error("Invalid taskParams object")
 
     if typeof taskObj.taskProcess != 'function'
-      console.log "Invalid taskProcess function for task: ", taskId
-      return false
+      throw new Error("Invalid taskProcess function")
 
     if typeof taskObj.taskSplit != 'function'
-      console.log "Invalid taskSplit function for task: ", taskId
-      return false
+      throw new Error("Invalid taskSplit function")
 
     if typeof taskObj.taskMerge != 'function'
-      console.log "Invalid taskMerge function for task: ", taskId
-      return false
+      throw new Error("Invalid taskMerge function")
 
     if typeof taskObj.taskResultEquals != 'function'
-      console.log "Invalid taskResultEquals function for task: ", taskId
-      return false
+      throw new Error("Invalid taskResultEquals function")
 
     @tasks[taskId] = taskObj
     @tasks[taskId].taskId = taskId

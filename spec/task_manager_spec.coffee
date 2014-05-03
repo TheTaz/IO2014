@@ -30,37 +30,27 @@ describe "TaskManager", ->
 
   it "does not add task without arguments", ->
     delete @dummyTask.taskParams
-    taskId = @taskManager.addTask @dummyTask
-
-    expect(taskId).toBeFalsy()
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "does not add task without Process function", ->
     @dummyTask.taskProcess = {} # Invalid function, but still not null
-    taskId = @taskManager.addTask @dummyTask
-
-    expect(taskId).toBeFalsy()
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "does not add task without ResultEquals function", ->
     @dummyTask.taskResultEquals = {} # Invalid function, but still not null
-    taskId = @taskManager.addTask @dummyTask
-
-    expect(taskId).toBeFalsy()
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "does not add task without Merge function", ->
     @dummyTask.taskMerge = {} # Invalid function, but still not null
-    taskId = @taskManager.addTask @dummyTask
-
-    expect(taskId).toBeFalsy()
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "does not add task without Split function", ->
     @dummyTask.taskSplit = {} # Invalid function, but still not null
-    taskId = @taskManager.addTask @dummyTask
-
-    expect(taskId).toBeFalsy()
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "creates a new id for each task", ->
