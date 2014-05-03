@@ -12,6 +12,8 @@
         "coffee-script": "1.7.x",
         "grunt": "0.4.x",
         "yuidocjs": "0.3.x",
+        "webdriverjs": "1.6.x",
+        "selenium-standalone": "2.41.x",
         "grunt-contrib-coffee": "0.10.x",
         "grunt-contrib-clean": "0.5.x",
         "grunt-contrib-copy": "0.5.x",
@@ -27,6 +29,7 @@
     "scripts": {
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
+        "pretest": "start-selenium",
         "test": "jasmine-node --coffee ./spec/"
     }
 }
