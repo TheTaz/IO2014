@@ -1,12 +1,41 @@
 events = require('events');
 
+###*
+# TaskManager class.
+# @class TaskManager
+###
 class TaskManager extends events.EventEmitter
 
   TaskStatus:
+    ###*
+    # Status for newly added tasks
+    # @attribute TaskStatus.new
+    ###
     new: 0
+
+    ###*
+    # Status for started tasks
+    # @attribute TaskStatus.running
+    ###
     running: 1
+
+    ###*
+    # Status for completed tasks
+    # @attribute TaskStatus.done
+    ###
     done: 2
+
+    ###*
+    # Status for removed tasks
+    # @attribute TaskStatus.removed
+    ###
     removed: 3
+
+    ###*
+    # Status for failed tasks
+    # @attribute TaskStatus.failed
+    ###
+    failed: 4
 
   constructor: (@dispatcher, @injector, @resultAggregator) ->
     events.EventEmitter.call this
@@ -16,6 +45,13 @@ class TaskManager extends events.EventEmitter
 
   ## API methods
 
+  ###*
+  # Registers given task. Note that this method does NOT start the task
+  # nor initializes it.
+  # @method addTask
+  # @param {Object} taskObj Structure of the task's object shall be same as in example_task.js
+  # @return {Integer} new task ID or false if taskObj is not valid Task Object
+  ###
   addTask: (taskObj) ->
     taskId = @newTaskId()
 
@@ -32,7 +68,13 @@ class TaskManager extends events.EventEmitter
 
     return taskId
 
-
+  ###*
+  # Starts (runs) task with given ID. This initializes task in ResultAggregator and JsInjector
+  # and dispatches jobs though JobDispatcher
+  # @method startTask
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  # @return {Boolean} True if everything is like it should be. False on error.
+  ###
   startTask: (taskId) ->
     task = @tasks[taskId]
     return false if not task?
@@ -46,6 +88,11 @@ class TaskManager extends events.EventEmitter
     return true
 
 
+  ###*
+  # Removes and stops task with given ID. Task is interrupted and its results are deleted.
+  # @method removeTask
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  ###
   removeTask: (taskId) ->
     @tasks[taskId] = null
 
@@ -55,7 +102,14 @@ class TaskManager extends events.EventEmitter
 
     @setTaskStatus taskId, @TaskStatus.removed
 
-
+  ###*
+  # Gets current state of task with given ID.
+  # @method getTaskState
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  # @return {Object} Returned object contains @TaskStatus in 'status' field and
+  # current result in 'currentResult'. 'currentResult' object is the same as one returned
+  # by ResultAggregator.getCurrentResult.
+  ###
   getTaskState: (taskId) ->
     return null if not @tasks[taskId]?
 
@@ -64,6 +118,24 @@ class TaskManager extends events.EventEmitter
       currentResult: @resultAggregator.getCurrentResult(taskId)
     }
 
+  ###*
+  # Sets new status for task with given ID. Designed for use with ResultAggregator
+  # for changing task status to TaskStatus.done or TaskStatus.failed
+  # @method setTaskStatus
+  # @param {Integer} taskId ID of the task that was returned by @addTask method
+  # @param {TaskStatus} newState new status for the task
+  # @return {Boolean} False if given task does not exist, True otherwise.
+  ###
+  setTaskStatus: (taskId, newStatus) ->
+    task = @tasks[taskId]
+    return false if not task?
+
+    oldStatus = task["status"]
+    task["status"] = newStatus
+
+    @emit 'task_state_change', taskId, oldStatus, newStatus
+
+    return true
 
 
   ## Internal methods
@@ -72,19 +144,8 @@ class TaskManager extends events.EventEmitter
     @lastTaskId = @lastTaskId ? 0
     ++@lastTaskId
 
-  setTaskStatus: (taskId, newState) ->
-    task = @tasks[taskId]
-    return false if not task?
 
-    oldState = task["status"]
-    task["status"] = newState
-
-    @emit 'task_state_change', taskId, oldState, newState
-
-    return true
-
-
-  taskStateChangeCallback: (taskId, oldState, newState) ->
+  taskStateChangeCallback: (taskId, oldStatus, newStatus) ->
     return true
 
 module.exports = TaskManager
