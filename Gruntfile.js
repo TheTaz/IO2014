@@ -44,7 +44,11 @@ module.exports = function(grunt) {
       all: ['src/**/*.js', 'spec/**/*.js']
     },
     coffee_jshint: {
-      options: {},
+      options: {
+        jshintrc: true,
+        jshintOptions: ['evil', "camelcase", "trailing"], // Why u no work?!
+        globals: ['console', 'require', 'module', 'jasmine', 'it', 'expect']
+      },
       source: {
         src: 'src/**/*.coffee'
       },
@@ -75,6 +79,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-coffee-jshint');
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
-  grunt.registerTask('default', ['clean:bin', 'copy:main', 'coffee', 'clean:coffee', 'copy:publicScripts', 'clean:publicScripts', 'yuidoc']);
+  grunt.registerTask('default', [/*'coffee_jshint', */'clean:bin', 'copy:main', 'coffee', 'clean:coffee', 'copy:publicScripts', 'clean:publicScripts', 'yuidoc']);
 
 };

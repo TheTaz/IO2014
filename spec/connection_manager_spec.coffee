@@ -26,5 +26,3 @@ describe "ConnectionManager", ->
         it "fetches connected clients", ->
             @connectionManager.getActiveConnections()
             expect(@sockets.clients).toHaveBeenCalled()
-
-

@@ -1,16 +1,35 @@
 class AdminConsole
   constructor: (@sockets, @dispatcher, @connectionManager) ->
     JsInjector = require './js_injector'
-    @jsInjector = new JsInjector(@connectionManager)
     TaskManager = require './task_manager'
-    @taskManager = new TaskManager(@dispatcher, @jsInjector)
+    ResultAggregator = require "./result_aggregator"
 
-    @sockets.on 'connection', (socket) ->
+    @jsInjector = new JsInjector(@connectionManager)
+    @resultAgregator = new ResultAggregator(@dispatcher)
+    @taskManager = new TaskManager(@dispatcher, @jsInjector, @resultAgregator)
+
+    @sockets.on 'connection', (socket) =>
       console.log 'admin connected'
-      socket.on 'command', (data) ->
-        task = eval data
-        @taskManager.manage task
-        console.log 'command executed: ' + data
-        socket.emit('result', 'Task completed! Result is: 3.14159265...')
+      socket.on 'command', (data) =>
+
+        try
+          task = eval '(' + data + ')'
+
+        if not task?
+          socket.emit('result', 'Invalid data!')
+          console.log "Invalid data: ", data
+          return
+
+        try
+          task.owner = socket
+          taskId = @taskManager.addTask task
+          @taskManager.startTask taskId
+          console.log 'command executed: ' + data
+          socket.emit('result', 'Task started!')
+        catch err
+          console.log "Failed to add task:", task
+          console.log "Cannot add task due to:", err
+          socket.emit('result', 'Invalid task!')
+
 
 module.exports = AdminConsole
