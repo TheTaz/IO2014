@@ -7,7 +7,7 @@ class JsInjector
   constructor: (@connectionManager) ->
 
   ###*
-  # Inject code, takes as parameter task id and task
+  # Inject code, takes as parameter task id and task processing function
   # @method injectCode
   # @param {Integer} taskId specified task identificator
   # @param {Function} taskProcessFun specified task processing function
@@ -21,6 +21,23 @@ class JsInjector
       type: "task"
       taskId: taskId
       task: taskProcessFun
+
+    for client in @connectionManager.getActiveConnections()
+      @connectionManager.send(client, data)
+
+  ###*
+  # Inject code, takes as parameter task id only
+  # @method injectCodeNoTPF
+  # @param {Integer} taskId specified task identificator
+  ###
+
+  injectCodeNoTPF: (taskId) ->
+
+    console.log "Loading code without task processing function for task: ", taskId
+
+    data =
+      type: "task"
+      taskId: taskId
 
     for client in @connectionManager.getActiveConnections()
       @connectionManager.send(client, data)
