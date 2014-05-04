@@ -15,8 +15,33 @@ class ConnectionManager
   # @constructor
   ###
   constructor: (@sockets) ->
+    ###*
+    # Value defining id of the last operation sent by the server
+    # @property lastServerMsgId
+    # @type Integer
+    ###
     @lastServerMsgId = 0
+
+    ###*
+    # Value defining id of the last operation sent by the client
+    # @property lastClientMsgId
+    # @type Integer
+    ###
     @lastClientMsgId = 0
+
+    ###*
+    # Object containing callbacks to execute when ack or error event is received.
+    # It has the following format:
+    # {
+    #   1: callback1,
+    #   2: callback2
+    # }
+    # Where 1, 2 are msgIds and callback1, callback2 are callbacks to run,
+    # when ack or error event for msgId 1 and 2 comes.
+    # @property responseCallbacks
+    # @type {Object}
+    ###
+    @responseCallbacks = {}
 
   ###*
   # Creates new message object and initializes it's msgId
@@ -38,10 +63,13 @@ class ConnectionManager
   # @param taskId id of a new task
   # @type {String}
   # @param runFun code of the function to run
+  # @type Object
+  # @param callback receives acknowledgement or error for generated msgId
   # @return Integer msgId of sent message
   ###
-  sendNewTaskToPeer: (socket, taskId, runFun) ->
+  sendNewTaskToPeer: (socket, taskId, runFun, callback) =>
     message = @generateNewMessage()
+    @responseCallbacks[message.msgId] = callback
     message.data = {
       taskId: taskId,
       runFun: runFun
@@ -56,10 +84,13 @@ class ConnectionManager
   # @param socket client connection handling socket 
   # @type Integer
   # @param taskId id of a task
+  # @type Object
+  # @param callback receives acknowledgement or error for generated msgId
   # @return Integer msgId of sent message
   ###
-  deleteTaskFromPeer: (socket, taskId) ->
+  deleteTaskFromPeer: (socket, taskId, callback) =>
     message = @generateNewMessage()
+    @responseCallbacks[message.msgId] = callback
     message.data = {
       taskId: taskId
     }
@@ -77,10 +108,13 @@ class ConnectionManager
   # @param jobId id of a job
   # @type {Object}
   # @param jobArgs arguments for a job to execute
+  # @type Object
+  # @param callback receives acknowledgement or error for generated msgId
   # @return Integer msgId of sent message
   ###
-  executeJobOnPeer: (socket, taskId, jobId, jobArgs) ->
+  executeJobOnPeer: (socket, taskId, jobId, jobArgs, callback) =>
     message = @generateNewMessage()
+    @responseCallbacks[message.msgId] = callback
     message.data = {
       taskId: taskId,
       jobId: jobId,
@@ -103,11 +137,17 @@ class ConnectionManager
     }
     socket.emit 'ack', message
 
+  ###*
+  # Callback can take a connected client as a parametr
+  # @method onPeerConnected
+  # @param {Function} callback a callback which will be executed when new clients is connected
+  ###
   onPeerConnected: (callback) =>
     @sockets.on 'connection', (socket) =>
 
       socket.on 'ack', (payload) =>
         console.log('Got message ' + payload.msgId + " acknowledgment")
+        @responseCallbacks[payload.msgId].onAck?()
 
       socket.on 'error', (payload) =>
         console.log('Message ' + payload.msgId + " generated error code " + payload.error)
@@ -125,6 +165,7 @@ class ConnectionManager
             console.log('Malformed operation, reason: ' + payload.details.reason)
           else
             console.log('Unknown error code')
+        responseCallbacks[payload.msgId].onError?()
 
       socket.on 'result', (payload) =>
         @lastClientMsgId = payload.msgId
@@ -137,23 +178,42 @@ class ConnectionManager
         @sendAckToPeer(socket, payload.msgId)
 
       callback(socket)  
-
+  
+  ###*
+  # @method onPeerDisconnected
+  # @param {Function} callback a callback which will be executed when someone disconnects
+  ###
   onPeerDisconnected: (callback) ->
     @sockets.on 'disconnect', callback
 
-  # TODO : document callback and test it somehow
+  ###*
+  # @method onCodeLoaded
+  # @param {Function} callback a callback which will be executed whenever a client emits code_loaded event
+  ###
   onCodeLoaded: (callback) ->
     @sockets.on 'code_loaded', callback
 
+  ###*
+  # @method onResultReady
+  # @param {Function} callback a callback which will be executed whenever a client emits result_ready event
+  ###
   onResultReady: (callback) ->
     @sockets.on 'result_ready', callback
 
-	# TODO : wrap up clients in a class allowing for custom events
-	getActiveConnections: ->
+  ###*
+  # @method getActiveConnections
+  # @return a list of currently connected clients
+  ###
+  getActiveConnections: ->
     @sockets.clients()
 
-  send: (client, data) ->
-    # Stub method
-    console.log "ConnectionManager:send(", client, ",", data , ")"
+  ###*
+  # Sends an event to specified client
+  # @method send
+  # @params {String} event_name event name
+  # @param {Object} params optional hash with params
+  ###
+  send: (client, event_name, params = {} ) ->
+    client.send(event_name, params)
 
 module.exports = ConnectionManager
