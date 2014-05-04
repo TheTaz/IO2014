@@ -5,7 +5,6 @@ events = require('events');
 # @class ResultAggregator
 # @constructor  
 ###
-
 class ResultAggregator
 
   constructor: (@connectionManager) ->
@@ -21,7 +20,7 @@ class ResultAggregator
   # @param {Integer} taskId identifier of the task to be forgotten
   ###
   forgetTask: (taskId) ->
-    @results[taskId] = null
+    delete @results[taskId]
 
   ###*
   # Initialize task with function to merge partial results
@@ -30,7 +29,6 @@ class ResultAggregator
   # @param {Function} mergeFun function aimed to merge partial results
   ###
   aggregateOn: (taskId, mergeFun) ->
-    # Stub methods
     @results[taskId] =
       taskMergeFun: mergeFun,
       partialResults: {}
@@ -45,6 +43,13 @@ class ResultAggregator
       partialResults: @results[taskId].partialResults,
       mergedResult: @results[taskId].taskMergeFun(result for jobId, result of @results[taskId].partialResults)
 
+  ###*
+  # Aggregates result for given job in given task
+  # @method addResultFor
+  # @param {Integer} taskId identifier of the task
+  # @param {Integer} jobId identifier of the job
+  # @param {Object} result task result
+  ###
   addResultFor: (taskId, jobId, result) ->
     if @results[taskId]
       @results[taskId].partialResults[jobId] = result
