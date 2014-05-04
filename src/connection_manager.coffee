@@ -5,7 +5,6 @@
 ###*
 # ConnectionManager class
 # @class ConnectionManager
-# @module server
 ###
 class ConnectionManager
 
@@ -57,14 +56,10 @@ class ConnectionManager
   ###*
   # Sends message to given client to add provided task
   # @method sendNewTaskToPeer
-  # @type {Object}
-  # @param socket client connection handling socket 
-  # @type Integer
-  # @param taskId id of a new task
-  # @type {String}
-  # @param runFun code of the function to run
-  # @type Object
-  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
+  # @param {Object} socket client connection handling socket 
+  # @param {Integer} taskId id of a new task
+  # @param {String} runFun code of the function to run
+  # @param {Object} callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   sendNewTaskToPeer: (socket, taskId, runFun, callback) =>
@@ -80,12 +75,9 @@ class ConnectionManager
   ###*
   # Sends message to given client to delete task
   # @method deleteTaskFromPeer
-  # @type {Object}
-  # @param socket client connection handling socket 
-  # @type Integer
-  # @param taskId id of a task
-  # @type Object
-  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
+  # @param {Object} socket client connection handling socket 
+  # @param {Integer} taskId id of a task
+  # @param {Object} callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   deleteTaskFromPeer: (socket, taskId, callback) =>
@@ -100,16 +92,11 @@ class ConnectionManager
   ###*
   # Sends message to given client to execute job
   # @method executeJobOnPeer
-  # @type {Object}
-  # @param socket client connection handling socket 
-  # @type Integer
-  # @param taskId id of a task
-  # @type Integer
-  # @param jobId id of a job
-  # @type {Object}
-  # @param jobArgs arguments for a job to execute
-  # @type Object
-  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
+  # @param {Object} socket client connection handling socket 
+  # @param {Integer} taskId id of a task
+  # @param {Integer} jobId id of a job
+  # @param {Object} jobArgs arguments for a job to execute
+  # @param {Object} callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   executeJobOnPeer: (socket, taskId, jobId, jobArgs, callback) =>
@@ -126,10 +113,8 @@ class ConnectionManager
   ###*
   # Sends acknowledgment message to given client
   # @method sendAckToPeer
-  # @type {Object}
-  # @param socket client connection handling socket 
-  # @type Integer
-  # @param msgId id of a message to accept
+  # @param {Object} socket client connection handling socket 
+  # @param {Integer} msgId id of a message to accept
   ###
   sendAckToPeer: (socket, msgId) ->
     message = {

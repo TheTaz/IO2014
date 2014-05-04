@@ -6,7 +6,6 @@
 ###*
 # Client class
 # @class Client
-# @module client
 ###
 class Client
   ###*
@@ -67,10 +66,8 @@ class Client
   ###*
   # Sets event listener for a given websocket event
   # @method addEventListener
-  # @type {String}
-  # @param event event name
-  # @type {Object}
-  # @param listener callback for an event, can take message payload as an argument
+  # @param {String} event event name
+  # @param {Object} listener callback for an event, can take message payload as an argument
   ###
   addEventListener: (event, listener) =>
     @socket.on event, listener
@@ -78,10 +75,8 @@ class Client
   ###*
   # Removes event listener for a given websocket event
   # @method removeEventListener
-  # @type {String}
-  # @param event event name
-  # @type {Object}
-  # @param listener callback for an event to remove
+  # @param {String} event event name
+  # @param {Object} listener callback for an event to remove
   ###
   removeEventListener: (event, listener) =>
     @socket.removeListener event, listener 
@@ -89,8 +84,7 @@ class Client
   ###*
   # Handler for adding new task operation. Saves given task if it exists.
   # @method onAddNewTask
-  # @type {Object}
-  # @param operation message payload
+  # @param {Object} operation message payload
   ###
   onAddNewTask: (operation) =>
     console.log operation.data.runFun
@@ -110,8 +104,7 @@ class Client
   ###*
   # Handler for deleting a task operation.
   # @method onDeleteTask
-  # @type {Object}
-  # @param operation message payload
+  # @param {Object} operation message payload
   ###
   onDeleteTask: (operation) =>
     taskId = operation.data.taskId
@@ -126,8 +119,7 @@ class Client
   # Loads a saved task, and executes it with given parameters.
   # After successful execution returnResult function is called.
   # @method onExecuteJob
-  # @type {Object}
-  # @param operation message payload
+  # @param {Object} operation message payload
   ###
   onExecuteJob: (operation) =>
     taskId = operation.data.taskId
@@ -159,10 +151,8 @@ class Client
   # Schedules a check for acknowledgement.
   # If there is no acknowledgement, the operation is restarted.
   # @method returnResult
-  # @type {Object}
-  # @param operation message payload
-  # @type {Object}
-  # @param result job result
+  # @param {Object} operation message payload
+  # @param {Object} result job result
   ###
   returnResult: (operation, result) =>
     taskResult = { 
@@ -196,8 +186,7 @@ class Client
   ###*
   # Should be called if operation structure is malformed and cannot be processed by the client.
   # @method onMalformedOperation
-  # @type {Object}
-  # @param operation message payload
+  # @param {Object} operation message payload
   ###
   onMalformedOperation: (operation) =>
     console.log 'Cannot handle operation' + operation.msgId
