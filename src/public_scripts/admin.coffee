@@ -6,7 +6,6 @@
 ###*
 # Admin class
 # @class Admin
-# @module admin
 ###
 class Admin
 
@@ -21,7 +20,7 @@ class Admin
     ###*
     # Socket handling the connection to the server
     # @property socket
-    # @type Object
+    # @type {Object}
     ###
     @socket = io.connect('http://localhost/admin')
 
@@ -85,10 +84,8 @@ class Admin
   ###*
   # Sets event listener for a given websocket event
   # @method addEventListener
-  # @type {String}
-  # @param event event name
-  # @type {Object}
-  # @param listener callback for an event, can take message payload as an argument
+  # @param {String} event event name
+  # @param {Object} listener callback for an event, can take message payload as an argument
   ###
   addEventListener: (event, listener) =>
     @socket.on event, listener
@@ -96,10 +93,8 @@ class Admin
   ###*
   # Removes event listener for a given websocket event
   # @method removeEventListener
-  # @type {String}
-  # @param event event name
-  # @type {Object}
-  # @param listener callback for an event to remove
+  # @param {String} event event name
+  # @param {Object} listener callback for an event to remove
   ###
   removeEventListener: (event, listener) =>
     @socket.removeListener event, listener 
@@ -107,10 +102,8 @@ class Admin
   ###*
   # Increses given progress bar element to given value
   # @method increaseProgress
-  # @type {Object}
-  # @param element progress bar DOM element to modify
-  # @type Integer
-  # @param value defines percentage that progress bar should indicate
+  # @param {Object} element progress bar DOM element to modify
+  # @param {Integer} value defines percentage that progress bar should indicate
   ###
   increaseProgress: (element, value) =>
     element.style.width = value + '%'
@@ -121,8 +114,7 @@ class Admin
   # Handler called after the task has been started by the server.
   # Adds new progress bar to indicate task progress
   # @method onStarted
-  # @type {Object}
-  # @param payload message payload
+  # @param {Object} payload message payload
   ###
   onStarted: (payload) =>
     taskId = payload.taskId
@@ -132,8 +124,7 @@ class Admin
   ###*
   # Handler called when the task couldn't be added or started by the server
   # @method onError
-  # @type {Object}
-  # @param payload message payload
+  # @param {Object} payload message payload
   ###
   onError: (payload) =>
     taskId = payload.taskId
@@ -151,8 +142,7 @@ class Admin
   ###*
   # Handler called when task has been completed and the result is available
   # @method onResult
-  # @type {Object}
-  # @param payload message payload
+  # @param {Object} payload message payload
   ###
   onResult: (payload) =>
     taskId = payload.taskId
@@ -163,8 +153,7 @@ class Admin
   ###*
   # Handler called when task progress needs to be updated
   # @method onResult
-  # @type {Object}
-  # @param payload message payload
+  # @param {Object} payload message payload
   ###
   onProgress: (payload) =>
     taskId = payload.taskId
