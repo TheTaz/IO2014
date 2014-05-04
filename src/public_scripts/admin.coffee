@@ -1,5 +1,5 @@
 ###*
-# This script runs in web browser, when client opens client.html
+# This script runs in web browser, when admin opens admin.html
 # @module admin
 ###
 
