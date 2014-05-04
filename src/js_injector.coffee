@@ -10,37 +10,17 @@ class JsInjector
   # Inject code, takes as parameter task id and task processing function
   # @method injectCode
   # @param {Integer} taskId specified task identificator
-  # @param {Function} taskProcessFun specified task processing function
+  # @param {Function} runFun specified task processing function
   ###
 
-  injectCode: (taskId, taskProcessFun) ->
+  injectCode: (taskId, runFun) ->
 
-    console.log "Loading code for task: ", taskId
-
-    data =
-      type: "task"
-      taskId: taskId
-      task: taskProcessFun
-
+    console.log "CodeInjector:Loading code for task: ", taskId
+    
     for client in @connectionManager.getActiveConnections()
-      @connectionManager.send(client, data)
+      @connectionManager.sendNewTaskToPeer(client, taskId, runFun)
 
-  ###*
-  # Inject code, takes as parameter task id only
-  # @method injectCodeNoTPF
-  # @param {Integer} taskId specified task identificator
-  ###
-
-  injectCodeNoTPF: (taskId) ->
-
-    console.log "Loading code without task processing function for task: ", taskId
-
-    data =
-      type: "task"
-      taskId: taskId
-
-    for client in @connectionManager.getActiveConnections()
-      @connectionManager.send(client, data)
+    console.log "CodeInjector:Code loaded for task: ", taskId
 
   ###*
   # Unloads code from clients, code is recognized by task id.
@@ -50,14 +30,12 @@ class JsInjector
 
   unloadCode: (taskId) ->
 
-    data =
-      type: "task"
-      taskId: taskId
+    console.log "CodeInjector:Unloading code for task: ", taskId
 
     for client in @connectionManager.getActiveConnections()
-      @connectionManager.unload(client, taskId)
+      @connectionManager.deleteTaskFromPeer(client, taskId)
 
-    console.log "Unloading code for task: ", taskId
+    console.log "CodeInjector:Code unloaded for task: ", taskId
 
   ###*
   # Callback run when code is injected to specified client
@@ -65,7 +43,7 @@ class JsInjector
   # @param {Function} callback a callback can get client id as a param
   ###
 
-  onCodeInjected: (callback) ->
-    @sockets.on 'code-injected', callback
+  onCodeInjected: (callback) -> 
+    @connectionManager.onCodeLoaded callback
 
 module.exports = JsInjector
