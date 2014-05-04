@@ -1,17 +1,16 @@
 describe "TaskManager", ->
   TaskManager = require "../src/task_manager"
 
-  dummyTask =
-    taskParams: true
-    taskProcess: (inputObj) -> true
-    taskResultEquals: (a, b) -> true
-    taskSplit: (inputObj, n) -> [inputObj]
-    taskMerge: (chunkData) ->
-      input: null
-      output: true
-
-
   beforeEach ->
+    @dummyTask =
+      taskParams: true
+      taskProcess: (inputObj) -> true
+      taskResultEquals: (a, b) -> true
+      taskSplit: (inputObj, n) -> [inputObj]
+      taskMerge: (chunkData) ->
+        input: null
+        output: true
+
     @jsInjector = jasmine.createSpyObj("jsInjector", ["injectCode", "unloadCode"])
     @jobDispatcher = jasmine.createSpyObj("jobDispatcher", ["dispatchTask", "stopTask"])
     @resultAggregator = jasmine.createSpyObj("ResultAggregator", ["aggregateOn", "forgetTask", "getCurrentResult"])
@@ -19,33 +18,53 @@ describe "TaskManager", ->
 
 
   it "add tasks", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
 
     expect(taskId).toBe @taskManager.lastTaskId
 
     addedTask = @taskManager.tasks[taskId]
 
-    expect(addedTask).toBeDefined()
-    expect(addedTask.taskId           == @taskManager.lastTaskId).toBeTruthy()
-    expect(addedTask.taskProcess      == dummyTask.taskProcess).toBeTruthy()
-    expect(addedTask.taskParams       == dummyTask.taskParams).toBeTruthy()
-    expect(addedTask.taskResultEquals == dummyTask.taskResultEquals).toBeTruthy()
-    expect(addedTask.taskSplit        == dummyTask.taskSplit).toBeTruthy()
-    expect(addedTask.taskMerge        == dummyTask.taskMerge).toBeTruthy()
-    expect(addedTask.status           == TaskManager::TaskStatus.new).toBeTruthy()
+    @dummyTask.taskId = @taskManager.lastTaskId
+    @dummyTask.status = TaskManager::TaskStatus.new
+    expect(addedTask).toEqual @dummyTask
+
+  it "does not add task without arguments", ->
+    delete @dummyTask.taskParams
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
+
+
+  it "does not add task without Process function", ->
+    @dummyTask.taskProcess = {} # Invalid function, but still not null
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
+
+
+  it "does not add task without ResultEquals function", ->
+    @dummyTask.taskResultEquals = {} # Invalid function, but still not null
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
+
+
+  it "does not add task without Merge function", ->
+    @dummyTask.taskMerge = {} # Invalid function, but still not null
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
+
+
+  it "does not add task without Split function", ->
+    @dummyTask.taskSplit = {} # Invalid function, but still not null
+    expect(@taskManager.addTask.bind(@dummyTask)).toThrowError()
 
 
   it "creates a new id for each task", ->
-    @taskManager.addTask dummyTask
+    @taskManager.addTask @dummyTask
     firstId = @taskManager.lastTaskId
 
-    @taskManager.addTask dummyTask
+    @taskManager.addTask @dummyTask
     secondId = @taskManager.lastTaskId
 
     expect(firstId).not.toBe(secondId)
 
+
   it "gets current state for the started task", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.startTask taskId
 
     obj = new Object()
@@ -58,58 +77,62 @@ describe "TaskManager", ->
 
 
   it "gets current state for the not started task", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     state = @taskManager.getTaskState taskId
 
     expect(state.status).toBe(TaskManager::TaskStatus.new)
 
 
   it "changes status on start", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.startTask taskId
 
     expect(@taskManager.getTaskState(taskId).status).toBe TaskManager::TaskStatus.running
 
 
   it "injects javascript code to client via JsInjector", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.startTask taskId
-    expect(@jsInjector.injectCode).toHaveBeenCalledWith(taskId, dummyTask.taskProcess)
+    expect(@jsInjector.injectCode).toHaveBeenCalledWith(taskId, @dummyTask.taskProcess)
 
 
   it "dispatches jobs through JobDispatcher", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.startTask taskId
-    expect(@jobDispatcher.dispatchTask).toHaveBeenCalledWith(taskId, dummyTask.taskParams, dummyTask.taskSplit)
+    expect(@jobDispatcher.dispatchTask).toHaveBeenCalledWith(taskId, @dummyTask.taskParams, @dummyTask.taskSplit)
+
 
   it "initializes result aggregator for the task", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.startTask taskId
-    expect(@resultAggregator.aggregateOn).toHaveBeenCalledWith(taskId, dummyTask.taskMerge)
+    expect(@resultAggregator.aggregateOn).toHaveBeenCalledWith(taskId, @dummyTask.taskMerge)
+
 
   it "unloads javascript code from client via JsInjector", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.removeTask taskId
     expect(@jsInjector.unloadCode).toHaveBeenCalledWith(taskId)
 
+
   it "removes jobs through JobDispatcher", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.removeTask taskId
     expect(@jobDispatcher.stopTask).toHaveBeenCalledWith(taskId)
 
+
   it "disables the task in result aggregator", ->
-    taskId = @taskManager.addTask dummyTask
+    taskId = @taskManager.addTask @dummyTask
     @taskManager.removeTask taskId
     expect(@resultAggregator.forgetTask).toHaveBeenCalledWith(taskId)
+
 
   it "fails to get state for non-existing task", ->
     expect(@taskManager.getTaskState(@taskManager.lastTaskId + 1)).toBeNull()
 
+
   it "fails to start non-existing task", ->
     expect(@taskManager.startTask(@taskManager.lastTaskId + 1)).toBeFalsy()
 
+
   it "fails to remove for non-existing task", ->
     expect(@taskManager.removeTask(@taskManager.lastTaskId + 1)).toBeFalsy()
-
-
-

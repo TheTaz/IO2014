@@ -34,4 +34,3 @@ describe "ConnectionManager", ->
         	@connectionManager.send(client, message)
         	expect(client.send).toHaveBeenCalledWith(message, {})
 
-
