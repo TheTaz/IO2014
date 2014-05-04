@@ -19,7 +19,8 @@
         "grunt-contrib-copy": "0.5.x",
         "grunt-contrib-yuidoc": "0.3.x",
         "grunt-contrib-jshint": "0.10.x",
-        "grunt-coffee-jshint": "0.2.x"
+        "grunt-coffee-jshint": "0.2.x",
+		"grunt-jasmine-node": "0.0.x"
     },
     "directories": {
         "src": "./src",

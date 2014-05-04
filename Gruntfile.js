@@ -31,7 +31,7 @@ module.exports = function(grunt) {
       options: {
         jshintrc: true
       },
-      all: ['src/**/*.js', 'spec/**/*.js']
+      all: ['src/**/*.js', 'spec/**/*.js', 'acceptance_test/**/*.js']
     },
     coffee_jshint: {
       options: {},
@@ -40,6 +40,9 @@ module.exports = function(grunt) {
       },
       specs: {
         src: 'spec/**/*.coffee'
+      },
+      accceptance_tests: {
+        src: 'acceptance_test/**/*.coffee'
       }
     },
     yuidoc: {
@@ -55,7 +58,21 @@ module.exports = function(grunt) {
           extension: '.coffee'
         }
       }
-    }
+    },
+	jasmine_node: {
+		options: {
+          specFolders:[],
+          projectRoot:'', 
+          forceExit: true,
+          match: '.',
+          matchall: false,
+          extensions: 'coffee',
+		  includeStackTrace: true,
+          specNameMatcher: 'spec',
+          coffee: true
+        },
+        all: ['acceptance_test/'] // will be merged with the specFolders option and the projectRoot
+	}
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -64,7 +81,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-coffee-jshint');
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
+  grunt.loadNpmTasks('grunt-jasmine-node');
 
   grunt.registerTask('default', ['jshint', 'clean:bin', 'copy', 'coffee', 'clean:coffee', 'yuidoc']);
-
+  grunt.registerTask('acceptance_test', ['jasmine_node'] );
+  
 };
