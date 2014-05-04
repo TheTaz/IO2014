@@ -66,13 +66,13 @@ class Client
 
   ###*
   # Sets event listener for a given websocket event
-  # @method setEventListener
+  # @method addEventListener
   # @type {String}
   # @param event event name
   # @type {Object}
   # @param listener callback for an event, can take message payload as an argument
   ###
-  setEventListener: (event, listener) =>
+  addEventListener: (event, listener) =>
     @socket.on event, listener
 
   ###*
@@ -84,21 +84,7 @@ class Client
   # @param listener callback for an event to remove
   ###
   removeEventListener: (event, listener) =>
-    @socket.removeListener event, listener
-
-  ###*
-  # Check whether there are any messages missed. Determined by lastServerMsgId and current msgId.
-  # @method checkIfMissedAnyMessages
-  # @type {Object}
-  # @param operation message payload
-  ###
-  checkIfMissedAnyMessages: (operation) =>
-    #TODO: Is this check needed?
-    if @lastServerMsgId + 1 isnt operation.msgId
-      console.log 'Synchronization error, last message id was: ' + @lastServerMsgId +  ' while current is: ' + operation.msgId
-      @socket.emit('error', { error: 4, msgId: i, details: { reason: 'Did not receive operation' } }) for i in [(@lastServerMsgId + 1)..(operation.msgId)]
-
-    @lastServerMsgId = operation.msgId
+    @socket.removeListener event, listener 
   
   ###*
   # Handler for adding new task operation. Saves given task if it exists.
@@ -155,6 +141,8 @@ class Client
       @socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: taskId } })
       return
 
+    @socket.emit('ack', { msgId: operation.msgId})
+
     console.log 'Executing task: ' + taskId
     console.log 'Task code: ' + task.task
     console.log 'Job arguments: ' + jobArgs
@@ -162,7 +150,6 @@ class Client
       result = eval(task.task).taskProcess jobArgs
       task.results[jobId] = result
       console.log 'Result is: ' + result
-      @socket.emit('ack', { msgId: operation.msgId})
       @returnResult(operation, result)
     catch error
       @socket.emit('error', { error: 2, msgId: operation.msgId, details: { taskId: taskId, jobId: jobId, reason: error } })
@@ -195,7 +182,7 @@ class Client
       console.log('Got acknowledgement for result with msgId ' + taskResult.msgId)
       resultAcknowledged = true
 
-    @setEventListener 'ack', ackEventListener
+    @addEventListener 'ack', ackEventListener
 
     setTimeout =>
       if not resultAcknowledged
@@ -220,17 +207,17 @@ console.log 'Client script loaded, connecting to server...'
 
 client = new Client()
 
-client.setEventListener 'addTask', (operation) =>
+client.addEventListener 'addTask', (operation) =>
   console.log('Event: new task')
-  client.checkIfMissedAnyMessages(operation)
+  @lastServerMsgId = operation.msgId
   client.onAddNewTask(operation)
 
-client.setEventListener 'deleteTask', (operation) =>
+client.addEventListener 'deleteTask', (operation) =>
   console.log('Event: delete task')
-  client.checkIfMissedAnyMessages(operation)
+  @lastServerMsgId = operation.msgId
   client.onDeleteTask(operation)
 
-client.setEventListener 'executeJob', (operation) =>
+client.addEventListener 'executeJob', (operation) =>
   console.log('Event: run job')
-  client.checkIfMissedAnyMessages(operation)
+  @lastServerMsgId = operation.msgId
   client.onExecuteJob(operation)
