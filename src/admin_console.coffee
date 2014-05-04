@@ -8,46 +8,28 @@ class AdminConsole
     @resultAgregator = new ResultAggregator(@dispatcher)
     @taskManager = new TaskManager(@dispatcher, @jsInjector, @resultAgregator)
 
-    @id = 0
-
     @sockets.on 'connection', (socket) =>
       console.log 'admin connected'
       socket.on 'command', (data) =>
-
-        localId = ++@id
-
-        socket.emit 'started', { taskId: localId }
-        setTimeout ->
-          socket.emit 'progress', { taskId: localId, progress: 33 }
-          setTimeout ->
-            socket.emit 'progress', { taskId: localId, progress: 66 }
-            setTimeout ->
-              socket.emit 'progress', { taskId: localId, progress: 100 }
-              setTimeout ->
-                socket.emit 'result', { taskId: localId, result: [1, 2, 3] }
-              , 3000
-            , 3000
-          , 3000
-        , 3000
         
-        # try
-        #   task = eval '(' + data + ')'
+        try
+          task = eval '(' + data + ')'
 
-        # if not task?
-        #   socket.emit('invalid')
-        #   console.log "Invalid data: ", data
-        #   return
+        if not task?
+          socket.emit('invalid')
+          console.log "Invalid data: ", data
+          return
 
-        # try
-        #   # task.owner = socket
-        #   taskId = @taskManager.addTask task
-        #   @taskManager.startTask taskId
-        #   console.log 'command executed: ' + data
-        #   socket.emit('started', { taskId: taskId })
-        # catch err
-        #   console.log "Failed to add task: ", task
-        #   console.log "Cannot add task due to: ", err.message
-        #   socket.emit('error', { taskId: taskId, details: err.message })
+        try
+          # task.owner = socket
+          taskId = @taskManager.addTask task
+          @taskManager.startTask taskId
+          console.log 'command executed: ' + data
+          socket.emit('started', { taskId: taskId })
+        catch err
+          console.log "Failed to add task: ", task
+          console.log "Cannot add task due to: ", err.message
+          socket.emit('error', { taskId: taskId, details: err.message })
 
       # valid events:
       # invalid
