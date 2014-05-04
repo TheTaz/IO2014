@@ -12,8 +12,8 @@ class ResultAggregator
     events.EventEmitter.call this
     @results = {}
 
-    @connectionManager.onResultReady (taskId, result) =>
-      @results[taskId].partialResults << result
+    @connectionManager.onResultReady (taskId, jobId, result) =>
+      @addResultFor(taskId, jobId, result)
 
   ###*
   # Forget specific task
@@ -33,7 +33,7 @@ class ResultAggregator
     # Stub methods
     @results[taskId] =
       taskMergeFun: mergeFun,
-      partialResults: []
+      partialResults: {}
 
   ###*
   # @method getCurrentResult
@@ -43,7 +43,11 @@ class ResultAggregator
   getCurrentResult: (taskId) ->
     if @results[taskId]
       partialResults: @results[taskId].partialResults,
-      mergedResult: @results[taskId].taskMergeFun(@results[taskId].partialResults)
+      mergedResult: @results[taskId].taskMergeFun(result for jobId, result of @results[taskId].partialResults)
 
+  addResultFor: (taskId, jobId, result) ->
+    if @results[taskId]
+      @results[taskId].partialResults[jobId] = result
 
 module.exports = ResultAggregator
+

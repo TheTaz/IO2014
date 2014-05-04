@@ -17,3 +17,9 @@ describe "ResultAggregator", ->
 
   it "returns undefined if task with certin id doesn't exist", ->
     expect(@resultAggregator.getCurrentResult(3)).toBe(undefined)
+
+  it "aggregates results", ->
+    @resultAggregator.aggregateOn(3, (numbers) -> numbers.reduce (s, t) -> s + t)
+    @resultAggregator.addResultFor(3, 1, 5)
+    @resultAggregator.addResultFor(3, 2, 8)
+    expect(@resultAggregator.getCurrentResult(3).mergedResult).toBe(13)
