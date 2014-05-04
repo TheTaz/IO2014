@@ -1,32 +1,63 @@
 <html>
 
-	<script src='/socket.io/socket.io.js'></script>
-	<script>
-  		var socket = io.connect('http://localhost/admin');
-  		function sendCommand() {
-  			console.log('sending command...');
-  			var command = document.getElementById('command').value;
-  			socket.emit('command', command);
-            document.getElementById('result').scrollIntoView();
-  		}
-        function doIncrement(inc){
-            var element = document.getElementById('progressbar');
-            var oldValue = parseInt(element.style.width);
-            var newValue = oldValue + inc;
-            element.style.width = newValue + '%';
-            element['aria-valuenow'] = newValue;
-            element.innerHTML = newValue + '%';
-        };
-        function increase() {
-            console.log('increasing progress bar...');
-            doIncrement(100);
-        }
-        socket.on('result', function (result){
-            console.log('received result: ' + result);
-            var resultOutput = document.getElementById('result');
-            resultOutput.value = result;
-        });
-	</script>
+  <script src='/socket.io/socket.io.js'></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script>
+      var socket = io.connect('http://localhost/admin');
+      var progressBarPrefix = '<div class="progress progress-striped active">';
+      var progressBarInnerPrefix = '<div id="progressBar_';
+
+      var progressBarInnerPostfix = '" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>';
+      var progressBarPostfix = '</div>';
+
+      var taskResultPrefix = '<textarea readonly class="col-md-12" style="margin-bottom: 100px" id="result_';
+      var taskResultInfix = '">';
+      var taskResultPostfix = '</textarea>';
+
+      function sendCommand() {
+        console.log('sending command...');
+        var command = document.getElementById('command').value;
+        socket.emit('command', command);
+      }
+
+      function increaseProgress(element, value){
+        element.style.width = value + '%';
+        element['aria-valuenow'] = value;
+        element.innerHTML = value + '%';
+      };
+
+      socket.on('started', function (payload){
+        taskId = payload.taskId;
+        progressBar = progressBarPrefix + progressBarInnerPrefix + taskId + progressBarInnerPostfix + progressBarPostfix;
+        console.log("Appending: " + progressBar);
+        $("#progressContainer").append(progressBar);
+      });
+
+      socket.on('error', function (payload){
+        taskId = payload.taskId;
+        details = payload.details;
+        taskResult = taskResultPrefix + taskId + taskResultInfix + details + taskResultPostfix
+        $("#progressContainer").append(taskResult);
+      });
+
+      socket.on('invalid', function(){
+        alert("Provided task is malformed");
+      });
+
+      socket.on('result', function (payload){
+        taskId = payload.taskId;
+        result = payload.result;
+        taskResult = taskResultPrefix + taskId + taskResultInfix + result + taskResultPostfix;
+        $("#progressBar_" + taskId).replaceWith(taskResult)
+      });
+
+      socket.on('progress', function (payload){
+        taskId = payload.taskId;
+        progress = payload.progress;
+        increaseProgress($("#progressBar_" + taskId)[0], progress);
+      });
+
+  </script>
 
     <head>
         <meta charset="utf-8">
@@ -38,7 +69,7 @@
 
     </head>
 
-	<body role="document">
+  <body role="document">
         <!-- Fixed navbar -->
         <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
             <div class="container">
@@ -55,8 +86,7 @@
                     <ul class="nav navbar-nav">
                         <li class="active"><a href="#">Home</a></li>
                         <li><a href="#send">Task sending</a></li>
-                        <li><a href="#progress">Progress bars</a></li>
-                        <li><a href="#receive">Task results</a></li>
+                        <li><a href="#execution">Execution</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -81,38 +111,22 @@
                 <h3>Here we can post tasks to execute</h3>
             </div>
 
-            <textarea class="col-md-12" style="margin-bottom: 50px; height: 400px" id='command'></textarea>
-
-            <button type="button" class=" col-md-12 btn btn-lg btn-primary" onclick="sendCommand()">Send</button>
-
             <div class="col-md-12">
-                <div class="page-header">
-                    <h1><a id="progress">Progress bars</a></h1>
-                </div>
+                <textarea class="col-md-12" style="margin-bottom: 50px; height: 400px" id='command'></textarea>
 
-                <div class="page-header">
-                    <h3>We'll use progress bars to visualize task execution</h3>
-                </div>
-
-                <div class="progress progress-striped active">
-                    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>
-                </div>
-
-                <button type="button" class=" col-md-12 btn btn-lg btn-primary" onclick="increase()">Increase</button>
-
-                <br>
-
-                <div class="page-header">
-                    <h1><a id="receive">Task results</a></h1>
-                </div>
-
-                <div class="page-header">
-                    <h3>We will receive task results</h3>
-                </div>
-
-                <textarea readonly class="col-md-12" style="margin-bottom: 100px" id='result'></textarea>
-
+                <button type="button" class="btn btn-lg btn-primary col-md-12" onclick="sendCommand()">Send</button>
             </div>
+
+            <div class="col-md-12" style="margin-bottom: 50px">
+                <div class="page-header">
+                  <h1><a id="execution">Execution</a></h1>
+                </div>
+
+                <div id="progressContainer" class="col-md-12">
+
+                </div>
+            </div>
+
         </div>
     </body>
 
