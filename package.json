@@ -20,7 +20,7 @@
         "grunt-contrib-yuidoc": "0.3.x",
         "grunt-contrib-jshint": "0.10.x",
         "grunt-coffee-jshint": "0.2.x",
-		"grunt-jasmine-node": "0.0.x"
+        "grunt-jasmine-node": "0.0.x"
     },
     "directories": {
         "src": "./src",
@@ -30,6 +30,7 @@
     "scripts": {
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
-        "test": "jasmine-node --coffee ./spec/"
+        "test": "jasmine-node --coffee ./spec/",
+		"accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"
     }
 }

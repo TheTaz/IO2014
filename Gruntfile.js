@@ -59,8 +59,8 @@ module.exports = function(grunt) {
         }
       }
     },
-	jasmine_node: {
-		options: {
+    jasmine_node: {
+        options: {
           specFolders:[],
           projectRoot:'', 
           forceExit: true,
