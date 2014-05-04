@@ -10,7 +10,7 @@
       var progressBarInnerPostfix = '" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>';
       var progressBarPostfix = '</div>';
 
-      var taskResultPrefix = '<textarea readonly class="col-md-12" style="margin-bottom: 100px" id="result_';
+      var taskResultPrefix = '<textarea readonly style="width: 100%" id="result_';
       var taskResultInfix = '">';
       var taskResultPostfix = '</textarea>';
 
@@ -112,11 +112,15 @@
             </div>
 
             <div class="col-md-12">
-                <textarea class="col-md-12" style="margin-bottom: 50px; height: 400px" id='command'></textarea>
-
-                <button type="button" class="btn btn-lg btn-primary col-md-12" onclick="sendCommand()">Send</button>
+                <textarea style="margin-bottom: 50px; height: 400px; width: 100%" id='command'></textarea>
             </div>
 
+            <div class="col-md-12 btn-group btn-group-justified">
+              <div class="btn-group">
+                <button type="button" class="btn btn-lg btn-primary" onclick="sendCommand()">Send</button>
+              </div>
+            </div>
+            
             <div class="col-md-12" style="margin-bottom: 50px">
                 <div class="page-header">
                   <h1><a id="execution">Execution</a></h1>
