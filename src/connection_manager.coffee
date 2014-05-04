@@ -64,7 +64,7 @@ class ConnectionManager
   # @type {String}
   # @param runFun code of the function to run
   # @type Object
-  # @param callback receives acknowledgement or error for generated msgId
+  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   sendNewTaskToPeer: (socket, taskId, runFun, callback) =>
@@ -85,7 +85,7 @@ class ConnectionManager
   # @type Integer
   # @param taskId id of a task
   # @type Object
-  # @param callback receives acknowledgement or error for generated msgId
+  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   deleteTaskFromPeer: (socket, taskId, callback) =>
@@ -109,7 +109,7 @@ class ConnectionManager
   # @type {Object}
   # @param jobArgs arguments for a job to execute
   # @type Object
-  # @param callback receives acknowledgement or error for generated msgId
+  # @param callback receives acknowledgement or error for generated msgId, should have onAck and onError functions defined
   # @return Integer msgId of sent message
   ###
   executeJobOnPeer: (socket, taskId, jobId, jobArgs, callback) =>
