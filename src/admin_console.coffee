@@ -44,31 +44,9 @@ class AdminConsole
     ###
     @taskManager = new TaskManager(@dispatcher, @jsInjector, @resultAgregator)
 
-    # #DEMO
-    # @id = 0
-    # #DEMO
-
     @sockets.on 'connection', (socket) =>
       console.log 'admin connected'
       socket.on 'command', (data) =>
-
-        # #DEMO
-        # localId = ++@id
-        # socket.emit 'started', { taskId: localId }
-        # setTimeout ->
-        #  socket.emit 'progress', { taskId: localId, progress: 33 }
-        #  setTimeout ->
-        #    socket.emit 'progress', { taskId: localId, progress: 66 }
-        #    setTimeout ->
-        #      socket.emit 'progress', { taskId: localId, progress: 100 }
-        #      setTimeout ->
-        #        socket.emit 'result', { taskId: localId, result: [1, 2, 3] }
-        #      , 3000
-        #    , 3000
-        #  , 3000
-        # , 3000
-        # #DEMO
-
         try
           task = eval '(' + data + ')'
 
