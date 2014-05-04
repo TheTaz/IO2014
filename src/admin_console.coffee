@@ -6,10 +6,6 @@ JsInjector = require './js_injector'
 TaskManager = require './task_manager'
 ResultAggregator = require "./result_aggregator"
 
-###*
-# AdminConsole class
-# @class AdminConsole
-###
 class AdminConsole
 
   ###*
@@ -71,7 +67,7 @@ class AdminConsole
   # @method notifyStarted
   # @param {Integer} taskId id of added task
   ###
-  notifyStarted: (taskId) =>
+  notifyStarted: (taskId) ->
     @sockets.emit 'started', { taskId: taskId }
 
   ###*
@@ -81,7 +77,7 @@ class AdminConsole
   # @param {Integer} taskId id of added task
   # @param {String} details message explaining what caused error
   ###
-  notifyError: (socket, taskId, details) =>
+  notifyError: (socket, taskId, details) ->
     socket.emit 'error', { taskId: taskId, details: details }
 
   ###*
@@ -89,7 +85,7 @@ class AdminConsole
   # @method notifyInvalid
   # @param {Object} socket responsible for maintaining connection with admin console
   ###
-  notifyInvalid: (socket) =>
+  notifyInvalid: (socket) ->
     socket.emit 'invalid'
 
   ###*
@@ -98,7 +94,7 @@ class AdminConsole
   # @param {Integer} taskId id of added task
   # @param {Object} result computed result of a task
   ###
-  notifyResult: (taskId, result) =>
+  notifyResult: (taskId, result) ->
     @sockets.emit 'result', { taskId: taskId, result: result }
 
   ###*
@@ -107,7 +103,7 @@ class AdminConsole
   # @param {Integer} taskId id of added task
   # @param {Integer} progress percentage of a task done
   ###
-  notifyProgress: (taskId, progress) =>
+  notifyProgress: (taskId, progress) ->
     @sockets.emit 'progress', { taskId: taskId, progress: progress }
 
 module.exports = AdminConsole

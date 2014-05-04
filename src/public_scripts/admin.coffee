@@ -87,7 +87,7 @@ class Admin
   # @param {String} event event name
   # @param {Object} listener callback for an event, can take message payload as an argument
   ###
-  addEventListener: (event, listener) =>
+  addEventListener: (event, listener) ->
     @socket.on event, listener
 
   ###*
@@ -96,7 +96,7 @@ class Admin
   # @param {String} event event name
   # @param {Object} listener callback for an event to remove
   ###
-  removeEventListener: (event, listener) =>
+  removeEventListener: (event, listener) ->
     @socket.removeListener event, listener 
 
   ###*
@@ -105,7 +105,7 @@ class Admin
   # @param {Object} element progress bar DOM element to modify
   # @param {Integer} value defines percentage that progress bar should indicate
   ###
-  increaseProgress: (element, value) =>
+  increaseProgress: (element, value) ->
     element.style.width = value + '%'
     element['aria-valuenow'] = value
     element.innerHTML = value + '%'
@@ -116,7 +116,7 @@ class Admin
   # @method onStarted
   # @param {Object} payload message payload
   ###
-  onStarted: (payload) =>
+  onStarted: (payload) ->
     taskId = payload.taskId
     progressBar = @progressBarPrefix + @progressBarInnerPrefix + taskId + @progressBarInnerPostfix + @progressBarPostfix
     $("#progressContainer").append(progressBar)
@@ -126,7 +126,7 @@ class Admin
   # @method onError
   # @param {Object} payload message payload
   ###
-  onError: (payload) =>
+  onError: (payload) ->
     taskId = payload.taskId
     details = payload.details
     taskResult = @taskResultPrefix + taskId + @taskResultInfix + details + @taskResultPostfix
@@ -136,7 +136,7 @@ class Admin
   # Handler called when the task is malformed - cannot be evaluated to js object
   # @method onInvalid
   ###
-  onInvalid: () =>
+  onInvalid: () ->
     alert("Provided task is malformed");
 
   ###*
@@ -144,7 +144,7 @@ class Admin
   # @method onResult
   # @param {Object} payload message payload
   ###
-  onResult: (payload) =>
+  onResult: (payload) ->
     taskId = payload.taskId
     result = payload.result
     taskResult = @taskResultPrefix + taskId + @taskResultInfix + result + @taskResultPostfix
@@ -155,7 +155,7 @@ class Admin
   # @method onResult
   # @param {Object} payload message payload
   ###
-  onProgress: (payload) =>
+  onProgress: (payload) ->
     taskId = payload.taskId
     progress = payload.progress
     @increaseProgress($("#progressBar_" + taskId)[0], progress)
