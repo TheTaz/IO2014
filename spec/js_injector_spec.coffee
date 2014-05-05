@@ -1,25 +1,31 @@
+###
 
 describe "JsInjector", ->
   JsInjector = require "../src/js_injector"
 
-  @connectionManager = jasmine.createSpyObj('connectionManager', ['getActiveConnections', 'sendNewTaskToPeer', 'deleteTaskFromPeer', 'onCodeLoaded'])
-  @jsInjector  = new JsInjector(@connectionManager)
-
-  before each ->
-    @dummytask =
-      taskId = 0;
-      runFun = (inputObj) -> true
+  beforeEach ->
+    @dummyTask =
+      taskId: 1;
+      runFun: (inputObj) -> true
+    @client = jasmine.createSpy "client"
+    @connectionManager = jasmine.createSpyObj('connectionManager', ['getActiveConnections', 'sendNewTaskToPeer', 'deleteTaskFromPeer', 'onCodeLoaded'])
+    @jsInjector  = new JsInjector connectionManager
 
   it "injects task processing function to clients", ->
-    @jsInjector.injectCode @dummytask.taskId @dummytask.runFun
-    expect(connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(connectionManager.sendNewTaskToPeer).toHaveBeenCalled
+    @taskId = @dummyTask.taskId
+    @runFun = @dummyTask.runFun
+    @jsInjector.injectCode(@taskId, @runFun)
+    expect(@connectionManager.getActiveConnections).toHaveBeenCalled
+    expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(@taskId, @runFun)
 
   it "unloads tasks from clients", ->
-    @jsInjector.unloadCode @dummytask.taskId
-    expect(connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(connectionManager.deleteTaskFromPeer).toHaveBeenCalled
+    @taskId = @dummyTask.taskId
+    @jsInjector.unloadCode(@taskId)
+    expect(@connectionManager.getActiveConnections).toHaveBeenCalled
+    expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(@taskId)
 
   it "callback when code has been injected", ->
-    @jsInjector.onCodeInjected
-    expect(connectionManager.onCodeLoaded).toHaveBeenCalled
+    @callback = jasmine.createSpy "callback"
+    @jsInjector.onCodeInjected(@callback)
+    expect(connectionManager.onCodeLoaded).toHaveBeenCalledWith(@callback)
+###

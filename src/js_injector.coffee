@@ -13,14 +13,32 @@ class JsInjector
   # @param {Function} runFun specified task processing function
   ###
 
+  currentTaskFun = null;
+
   injectCode: (taskId, runFun) ->
 
     console.log "CodeInjector:Loading code for task: ", taskId
+
+    currentTaskFun = runFun;
     
     for client in @connectionManager.getActiveConnections()
       @connectionManager.sendNewTaskToPeer(client, taskId, runFun)
 
     console.log "CodeInjector:Code loaded for task: ", taskId
+
+  ###*
+  # Handles new clients and gives them stored task proc fun taking as a param task id only
+  # @method newClientHandler
+  # @param {Integer} taskId specified task identificator
+  ###
+
+  newClientHandler: (taskId) ->
+
+    console.log "CodeInjector:Handling new clients with task: ", taskId
+
+    for client in @connectionManager.getActiveConnections()
+      if @connectionManager.onCodeLoaded == 'code_loaded'
+        @connectionManager.sendNewTaskToPeer(client, taskId, currentTaskFun)
 
   ###*
   # Unloads code from clients, code is recognized by task id.
