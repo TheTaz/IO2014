@@ -13,21 +13,7 @@ class Client
   # @class Client
   # @constructor
   ###
-  constructor: () ->
-
-    ###*
-    # Address for client to connect to server websocket
-    # @property clientEndpoint
-    # @type {String}
-    ###
-    @clientEndpoint = 'http://localhost/client'
-
-    ###*
-    # Socket handling the connection to the server
-    # @property socket
-    # @type Object
-    ###
-    @socket = io.connect @clientEndpoint
+  constructor: (@socket) ->
 
     ###*
     # Value defining id of the last operation sent by the server
@@ -87,9 +73,6 @@ class Client
   # @param {Object} operation message payload
   ###
   onAddNewTask: (operation) =>
-    console.log operation.data.runFun
-    console.log typeof operation.data.runFun
-
     if operation.data.runFun instanceof String or typeof operation.data.runFun is 'string'
       taskId = operation.data.taskId
       @tasks[taskId] = {}
@@ -183,18 +166,10 @@ class Client
         @removeEventListener 'ack', ackEventListener
     , 5000
 
-  ###*
-  # Should be called if operation structure is malformed and cannot be processed by the client.
-  # @method onMalformedOperation
-  # @param {Object} operation message payload
-  ###
-  onMalformedOperation: (operation) =>
-    console.log 'Cannot handle operation' + operation.msgId
-    @socket.emit('error', { error: 4, msgId: i, details: { reason: 'Cannot handle operation' } })
+clientEndpoint = 'http://localhost/client'
+socket = io.connect clientEndpoint
 
-console.log 'Client script loaded, connecting to server...'
-
-client = new Client()
+client = new Client(socket)
 
 client.addEventListener 'addTask', (operation) =>
   console.log('Event: new task')
@@ -210,3 +185,4 @@ client.addEventListener 'executeJob', (operation) =>
   console.log('Event: run job')
   @lastServerMsgId = operation.msgId
   client.onExecuteJob(operation)
+  
