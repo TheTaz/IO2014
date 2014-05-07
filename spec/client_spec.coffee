@@ -2,7 +2,7 @@ describe "Client", ->
   Client = require "../src/public_scripts/client"
 
   beforeEach ->
-    @socket = jasmine.createSpy "socket", ["on", "emit", "removeListener"]
+    @socket = jasmine.createSpyObj "socket", ["on", "emit", "removeListener"]
     @client = new Client(@socket)
 
   it "adds event listener", ->
@@ -14,7 +14,7 @@ describe "Client", ->
   it "removes event listener", ->
     event = "test_event"
     listener = jasmine.createSpy "listener"
-    @client.removeListener event, listener
+    @client.removeEventListener event, listener
     expect(@socket.removeListener).toHaveBeenCalledWith(event, listener)
 
   it "adds new task", ->

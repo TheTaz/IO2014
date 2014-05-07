@@ -49,6 +49,21 @@ class Client
     ###
     @tasks = {}
 
+    @addEventListener 'addTask', (operation) ->
+      console.log('Event: new task')
+      @lastServerMsgId = operation.msgId
+      onAddNewTask(operation)
+
+    @addEventListener 'deleteTask', (operation) ->
+      console.log('Event: delete task')
+      @lastServerMsgId = operation.msgId
+      onDeleteTask(operation)
+
+    @addEventListener 'executeJob', (operation) ->
+      console.log('Event: run job')
+      @lastServerMsgId = operation.msgId
+      onExecuteJob(operation)
+
   ###*
   # Sets event listener for a given websocket event
   # @method addEventListener
@@ -166,23 +181,9 @@ class Client
         @removeEventListener 'ack', ackEventListener
     , 5000
 
-clientEndpoint = 'http://localhost/client'
-socket = io.connect clientEndpoint
-
-client = new Client(socket)
-
-client.addEventListener 'addTask', (operation) =>
-  console.log('Event: new task')
-  @lastServerMsgId = operation.msgId
-  client.onAddNewTask(operation)
-
-client.addEventListener 'deleteTask', (operation) =>
-  console.log('Event: delete task')
-  @lastServerMsgId = operation.msgId
-  client.onDeleteTask(operation)
-
-client.addEventListener 'executeJob', (operation) =>
-  console.log('Event: run job')
-  @lastServerMsgId = operation.msgId
-  client.onExecuteJob(operation)
-  
+if module?
+  #Needed to work on server side (tests)
+  module.exports = Client
+else
+  #Needed to work on client
+  window.Client = Client
