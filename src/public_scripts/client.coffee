@@ -49,20 +49,19 @@ class Client
     ###
     @tasks = {}
 
-    @addEventListener 'addTask', (operation) ->
+    @addEventListener 'addTask', (operation) =>
       console.log('Event: new task')
-      @lastServerMsgId = operation.msgId
-      onAddNewTask(operation)
+      @onAddNewTask(operation)
 
-    @addEventListener 'deleteTask', (operation) ->
+    @addEventListener 'deleteTask', (operation) =>
       console.log('Event: delete task')
-      @lastServerMsgId = operation.msgId
-      onDeleteTask(operation)
+      @onDeleteTask(operation)
 
-    @addEventListener 'executeJob', (operation) ->
+    @addEventListener 'executeJob', (operation) =>
       console.log('Event: run job')
-      @lastServerMsgId = operation.msgId
-      onExecuteJob(operation)
+      @onExecuteJob(operation)
+
+    console.log 'Client script started, waiting for operations'
 
   ###*
   # Sets event listener for a given websocket event
@@ -88,6 +87,7 @@ class Client
   # @param {Object} operation message payload
   ###
   onAddNewTask: (operation) =>
+    @lastServerMsgId = operation.msgId
     if operation.data.runFun instanceof String or typeof operation.data.runFun is 'string'
       taskId = operation.data.taskId
       @tasks[taskId] = {}
@@ -105,6 +105,7 @@ class Client
   # @param {Object} operation message payload
   ###
   onDeleteTask: (operation) =>
+    @lastServerMsgId = operation.msgId
     taskId = operation.data.taskId
 
     #TODO: Fire-and-forget call, or notify server that taskId was already removed?
@@ -120,6 +121,7 @@ class Client
   # @param {Object} operation message payload
   ###
   onExecuteJob: (operation) =>
+    @lastServerMsgId = operation.msgId
     taskId = operation.data.taskId
     jobId = operation.data.jobId
     jobArgs = operation.data.jobArgs

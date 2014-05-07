@@ -65,6 +65,8 @@ class ConnectionManager
   sendNewTaskToPeer: (socket, taskId, runFun, callback) =>
     message = @generateNewMessage()
     @responseCallbacks[message.msgId] = callback
+    #if not runFun instanceof String and not typeof runFun is 'string'
+      #runFun = String(runFun)
     message.data = {
       taskId: taskId,
       runFun: runFun
