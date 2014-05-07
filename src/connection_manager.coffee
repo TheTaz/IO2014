@@ -134,7 +134,7 @@ class ConnectionManager
 
       socket.on 'ack', (payload) =>
         console.log('Got message ' + payload.msgId + " acknowledgment")
-        @responseCallbacks[payload.msgId].onAck?()
+        @responseCallbacks[payload.msgId]?.onAck?()
 
       socket.on 'error', (payload) =>
         console.log('Message ' + payload.msgId + " generated error code " + payload.error)
@@ -152,7 +152,7 @@ class ConnectionManager
             console.log('Malformed operation, reason: ' + payload.details.reason)
           else
             console.log('Unknown error code')
-        responseCallbacks[payload.msgId].onError?()
+        @responseCallbacks[payload.msgId]?.onError?()
 
       socket.on 'result', (payload) =>
         @lastClientMsgId = payload.msgId
