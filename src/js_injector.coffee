@@ -1,44 +1,43 @@
 ###*
+# @module server
+###
+
+###*
 # Js code injector class.
 # @class JsInjector
 ###
 
 class JsInjector
+
+  ###*
+  # Initializes taskFunctionsList
+  # @class JsInjector
+  # @constructor
+  ###
+
   constructor: (@connectionManager) ->
+    taskFunctionsList = {}
 
   ###*
   # Inject code, takes as parameter task id and task processing function
   # @method injectCode
   # @param {Integer} taskId specified task identificator
   # @param {Function} runFun specified task processing function
+  # @default {null} runFun
   ###
 
-  currentTaskFun = null;
+  injectCode: (taskId, runFun = null) ->
 
-  injectCode: (taskId, runFun) ->
-
-    console.log "CodeInjector:Loading code for task: ", taskId
-
-    currentTaskFun = runFun;
-    
-    for client in @connectionManager.getActiveConnections()
-      @connectionManager.sendNewTaskToPeer(client, taskId, runFun)
-
-    console.log "CodeInjector:Code loaded for task: ", taskId
-
-  ###*
-  # Handles new clients and gives them stored task proc fun taking as a param task id only
-  # @method newClientHandler
-  # @param {Integer} taskId specified task identificator
-  ###
-
-  newClientHandler: (taskId) ->
-
-    console.log "CodeInjector:Handling new clients with task: ", taskId
-
-    for client in @connectionManager.getActiveConnections()
-      if @connectionManager.onCodeLoaded == 'code_loaded'
-        @connectionManager.sendNewTaskToPeer(client, taskId, currentTaskFun)
+    if runFun != null
+      console.log "CodeInjector:Loading code for task #{taskId}..."
+      taskFunctionsList[taskId] = runFun;
+      for client in @connectionManager.getActiveConnections()
+        @connectionManager.sendNewTaskToPeer(client, taskId, taskFunctionsList[taskId])
+      console.log "CodeInjector::Code loaded for task #{taskId} !"
+    else 
+      console.log "CodeInjectror::Complementing clients for task #{taskId}..."
+      if @connectionManager.onCodeLoaded != 'code_loaded'
+        @connectionManager.sendNewTaskToPeer(client, taskId, taskFunctionsList[taskId])
 
   ###*
   # Unloads code from clients, code is recognized by task id.
@@ -49,10 +48,9 @@ class JsInjector
   unloadCode: (taskId) ->
 
     console.log "CodeInjector:Unloading code for task: ", taskId
-
     for client in @connectionManager.getActiveConnections()
       @connectionManager.deleteTaskFromPeer(client, taskId)
-
+    taskFunctionsList[taskId].delete
     console.log "CodeInjector:Code unloaded for task: ", taskId
 
   ###*
