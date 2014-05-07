@@ -140,8 +140,9 @@ class Client
       result = eval(task.task).taskProcess jobArgs
       task.results[jobId] = result
       console.log 'Result is: ' + result
-      @returnResult(operation, result)
+      @returnResult(operation, result, true)
     catch error
+      console.log 'Error while executing task: ' + error.message
       @socket.emit('error', { error: 2, msgId: operation.msgId, details: { taskId: taskId, jobId: jobId, reason: error } })
     
   ###*
@@ -151,8 +152,9 @@ class Client
   # @method returnResult
   # @param {Object} operation message payload
   # @param {Object} result job result
+  # @param {boolean} specifies whether to resend result if no acknowledgement received
   ###
-  returnResult: (operation, result) =>
+  returnResult: (operation, result, retry) =>
     taskResult = { 
       msgId:  --@lastClientMsgId, 
       data: { 
@@ -164,22 +166,23 @@ class Client
 
     @socket.emit('result', taskResult)
 
-    resultAcknowledged = false
+    if retry
+      resultAcknowledged = false
 
-    ackEventListener = (message) ->
-      console.log('Got acknowledgement for result with msgId ' + taskResult.msgId)
-      resultAcknowledged = true
+      ackEventListener = (message) ->
+        console.log('Got acknowledgement for result with msgId ' + taskResult.msgId)
+        resultAcknowledged = true
 
-    @addEventListener 'ack', ackEventListener
+      @addEventListener 'ack', ackEventListener
 
-    setTimeout =>
-      if not resultAcknowledged
-        console.log('Did not get acknowledgement, trying one more time')
-        @removeEventListener 'ack', ackEventListener
-        @returnResult operation, result
-      else
-        @removeEventListener 'ack', ackEventListener
-    , 5000
+      setTimeout =>
+        if not resultAcknowledged
+          console.log('Did not get acknowledgement, trying one more time')
+          @removeEventListener 'ack', ackEventListener
+          @returnResult operation, result
+        else
+          @removeEventListener 'ack', ackEventListener
+      , 5000
 
 if module?
   #Needed to work on server side (tests)
