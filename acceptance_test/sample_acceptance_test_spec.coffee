@@ -10,7 +10,7 @@ describe "my webdriverjs tests", ->
     beforeEach ->
         client = webdriverjs.remote({
             desiredCapabilities: {
-                browserName: 'chrome'
+                browserName: 'phantomjs'
             }
         })
         client.init()
