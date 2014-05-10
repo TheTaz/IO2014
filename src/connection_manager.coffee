@@ -46,10 +46,10 @@ class ConnectionManager
 
     @onPeerConnected (socket) =>
       socket.on 'ack', (payload) =>
-        @onAck payload
+        @onAck socket, payload
 
       socket.on 'error', (payload) =>
-        @onError payload
+        @onError socket, payload
 
       socket.on 'result', (payload) =>
         @onResult socket, payload
@@ -76,7 +76,7 @@ class ConnectionManager
   ###
   sendNewTaskToPeer: (socket, taskId, runFun, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = callback
+    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
     if not runFun instanceof String and not typeof runFun is 'string'
       runFun = '(' + runFun + ')'
     message.data = {
@@ -96,7 +96,7 @@ class ConnectionManager
   ###
   deleteTaskFromPeer: (socket, taskId, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = callback
+    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
     message.data = {
       taskId: taskId
     }
@@ -115,7 +115,7 @@ class ConnectionManager
   ###
   executeJobOnPeer: (socket, taskId, jobId, jobArgs, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = callback
+    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
     message.data = {
       taskId: taskId,
       jobId: jobId,
@@ -139,18 +139,23 @@ class ConnectionManager
   ###*
   # Default handler for acknowledgements from clients
   # @method onAck
+  # @param {Object} socket object used to communicate with connected client
   # @param {Object} payload data sent along with the event
   ###
-  onAck: (payload) ->
+  onAck: (socket, payload) ->
     if @debug then console.log('Got message ' + payload.msgId + " acknowledgment")
-    @responseCallbacks[payload.msgId]?.onAck?()
+    taskId = @responseCallbacks[payload.msgId]?.taskId
+    callback = @responseCallbacks[payload.msgId]?.callback
+    if taskId? then callback?.onAck?(socket, taskId)
+    delete @responseCallbacks[payload.msgId]
 
   ###*
   # Default handler for errors from clients
   # @method onError
+  # @param {Object} socket object used to communicate with connected client
   # @param {Object} payload data sent along with the event
   ###
-  onError: (payload) ->
+  onError: (socket, payload) ->
     if @debug then console.log('Message ' + payload.msgId + " generated error code " + payload.error)
     if @debug then console.log('Details:')
     switch payload.error
@@ -166,7 +171,10 @@ class ConnectionManager
         if @debug then console.log('Malformed operation, reason: ' + payload.details.reason)
       else
         if @debug then console.log('Unknown error code')
-    @responseCallbacks[payload.msgId]?.onError?()
+    taskId = @responseCallbacks[payload.msgId]?.taskId
+    callback = @responseCallbacks[payload.msgId]?.callback
+    if taskId? then callback?.onError?(socket, taskId)
+    delete @responseCallbacks[payload.msgId]
 
   ###*
   # Default handler for result events from clients
