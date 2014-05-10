@@ -16,7 +16,7 @@ class JsInjector
   ###
 
   constructor: (@connectionManager) ->
-    taskFunctionsList = {}
+    taskFunctionsList = []
 
   ###*
   # Inject code, takes as parameter task id and task processing function
