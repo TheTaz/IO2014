@@ -3,7 +3,7 @@ describe "Client", ->
 
   beforeEach ->
     @socket = jasmine.createSpyObj "socket", ["on", "emit", "removeListener"]
-    @client = new Client(@socket)
+    @client = new Client(@socket, false)
 
   it "adds event listener", ->
     event = "test_event"

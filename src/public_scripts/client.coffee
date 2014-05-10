@@ -13,7 +13,7 @@ class Client
   # @class Client
   # @constructor
   ###
-  constructor: (@socket) ->
+  constructor: (@socket, @debug) ->
 
     ###*
     # Value defining id of the last operation sent by the server
@@ -50,18 +50,18 @@ class Client
     @tasks = {}
 
     @addEventListener 'addTask', (operation) =>
-      console.log('Event: new task')
+      if @debug then console.log('Event: new task')
       @onAddNewTask(operation)
 
     @addEventListener 'deleteTask', (operation) =>
-      console.log('Event: delete task')
+      if @debug then console.log('Event: delete task')
       @onDeleteTask(operation)
 
     @addEventListener 'executeJob', (operation) =>
-      console.log('Event: run job')
+      if @debug then console.log('Event: run job')
       @onExecuteJob(operation)
 
-    console.log 'Client script started, waiting for operations'
+    if @debug then console.log 'Client script started, waiting for operations'
 
   ###*
   # Sets event listener for a given websocket event
@@ -93,10 +93,10 @@ class Client
       @tasks[taskId] = {}
       @tasks[taskId].task = operation.data.runFun
       @tasks[taskId].results = {}
-      console.log 'Added new task: ' + @tasks[taskId].task
+      if @debug then console.log 'Added new task: ' + @tasks[taskId].task
       @socket.emit('ack', { msgId: operation.msgId})
     else 
-      console.log 'No task function provided'
+      if @debug then console.log 'No task function provided'
       @socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: operation.data.taskId } });
 
   ###*
@@ -110,7 +110,7 @@ class Client
 
     #TODO: Fire-and-forget call, or notify server that taskId was already removed?
     delete @tasks[taskId]
-    console.log 'Deleted task: ' + taskId
+    if @debug then console.log 'Deleted task: ' + taskId
     @socket.emit('ack', { msgId: operation.msgId})
 
   ###*
@@ -129,22 +129,22 @@ class Client
     task = @tasks[taskId]
 
     if not task?
-      console.log 'Cannot execute task, it doesn\'t exist'
+      if @debug then console.log 'Cannot execute task, it doesn\'t exist'
       @socket.emit('error', { error: 1, msgId: operation.msgId, details: { taskId: taskId } })
       return
 
     @socket.emit('ack', { msgId: operation.msgId})
 
-    console.log 'Executing task: ' + taskId
-    console.log 'Task code: ' + task.task
-    console.log 'Job arguments: ' + jobArgs
+    if @debug then console.log 'Executing task: ' + taskId
+    if @debug then console.log 'Task code: ' + task.task
+    if @debug then console.log 'Job arguments: ' + jobArgs
     try
       result = eval(task.task).taskProcess jobArgs
       task.results[jobId] = result
-      console.log 'Result is: ' + result
+      if @debug then console.log 'Result is: ' + result
       @returnResult(operation, result, true)
     catch error
-      console.log 'Error while executing task: ' + error.message
+      if @debug then console.log 'Error while executing task: ' + error.message
       @socket.emit('error', { error: 2, msgId: operation.msgId, details: { taskId: taskId, jobId: jobId, reason: error } })
     
   ###*
@@ -179,7 +179,7 @@ class Client
 
       setTimeout =>
         if not resultAcknowledged
-          console.log('Did not get acknowledgement, trying one more time')
+          if @debug then console.log('Did not get acknowledgement, trying one more time')
           @removeEventListener 'ack', ackEventListener
           @returnResult operation, result
         else
