@@ -67,7 +67,7 @@ class ConnectionManager
     message = @generateNewMessage()
     @responseCallbacks[message.msgId] = callback
     if not runFun instanceof String and not typeof runFun is 'string'
-      runFun = String(runFun)
+      runFun = '(' + runFun + ')'
     message.data = {
       taskId: taskId,
       runFun: runFun
