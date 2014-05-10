@@ -70,9 +70,9 @@ describe "Client", ->
 
     msgId = 7
     taskId = 1
-    operation = { msgId: msgId, data: { taskId: taskId, runFun: "({ taskProcess: function(inputObj) {
+    operation = { msgId: msgId, data: { taskId: taskId, runFun: "(function(inputObj) {
         return [inputObj.number, inputObj.begin, inputObj.end];
-    } })"} }
+    })"} }
     @client.onAddNewTask operation
 
     msgId = 8
@@ -93,9 +93,9 @@ describe "Client", ->
 
     msgId = 7
     taskId = 1
-    operation = { msgId: msgId, data: { taskId: taskId, runFun: "({ taskProcess: function(inputObj) {
+    operation = { msgId: msgId, data: { taskId: taskId, runFun: "(function(inputObj) {
         return [inputObj.number, inputObj.begin, inputObj.end];
-    }; })"} }
+    };)"} }
     @client.onAddNewTask operation
 
     msgId = 8

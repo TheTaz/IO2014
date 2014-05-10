@@ -163,7 +163,7 @@ class ConnectionManager
         console.log('Sending acknowledgment to client')
         @sendAckToPeer(socket, payload.msgId)
 
-      callback(socket)  
+    @sockets.on 'connection', callback 
   
   ###*
   # @method onPeerDisconnected
