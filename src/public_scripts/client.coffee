@@ -12,6 +12,8 @@ class Client
   # Initializes message counters and socket
   # @class Client
   # @constructor
+  # @param {Object} socket socket.io socket used to connect to the server
+  # @param {Boolean} debug enables debug outputs
   ###
   constructor: (@socket, @debug) ->
 
@@ -139,7 +141,7 @@ class Client
     if @debug then console.log 'Task code: ' + task.task
     if @debug then console.log 'Job arguments: ' + jobArgs
     try
-      result = eval(task.task).taskProcess jobArgs
+      result = eval(task.task) jobArgs
       task.results[jobId] = result
       if @debug then console.log 'Result is: ' + result
       @returnResult(operation, result, true)

@@ -12,6 +12,7 @@ class ConnectionManager
   # Initializes message counters
   # @class ConnectionManager
   # @constructor
+  # @param {Object} sockets socket.io socket used by clients to connect to the server
   ###
   constructor: (@sockets) ->
     ###*
@@ -65,8 +66,6 @@ class ConnectionManager
   sendNewTaskToPeer: (socket, taskId, runFun, callback) =>
     message = @generateNewMessage()
     @responseCallbacks[message.msgId] = callback
-    #if not runFun instanceof String and not typeof runFun is 'string'
-      #runFun = String(runFun)
     message.data = {
       taskId: taskId,
       runFun: runFun
