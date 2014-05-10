@@ -15,22 +15,6 @@ describe "ConnectionManager", ->
       @connectionManager.onPeerDisconnected(@callback)
       expect(@sockets.on).toHaveBeenCalledWith("disconnect", @callback)
 
-    it "notifies when code is loaded", ->
-      @connectionManager.onCodeLoaded(@callback)
-      expect(@sockets.on).toHaveBeenCalledWith("code_loaded", @callback)
-
-    it "notifies when partial result is ready", ->
-      @connectionManager.onResultReady(@callback)
-      expect(@sockets.on).toHaveBeenCalledWith("result_ready", @callback)
-
     it "fetches connected clients", ->
       @connectionManager.getActiveConnections()
       expect(@sockets.clients).toHaveBeenCalled()
-
-    it "executes command on selected client", ->
-      client = jasmine.createSpyObj "client", ["send"]
-      message = "foo"
-
-      @connectionManager.send(client, message)
-      expect(client.send).toHaveBeenCalledWith(message, {})
-
