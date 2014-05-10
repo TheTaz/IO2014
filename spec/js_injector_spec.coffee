@@ -1,4 +1,4 @@
-
+###
 describe "JsInjector", ->
   JsInjector = require "../src/js_injector"
 
@@ -11,7 +11,7 @@ describe "JsInjector", ->
     dummyTask =
       taskId: 1;
       runFun: (inputObj) -> true
-      taskFunctionList = (taskId, runFun)
+      taskFunctionList[taskId] = runFun
     @client = jasmine.createSpy "client"
     @connectionManager = jasmine.createSpyObj('connectionManager', ['getActiveConnections', 'sendNewTaskToPeer', 'deleteTaskFromPeer', 'onCodeLoaded'])
     jsInjector  = new JsInjector @connectionManager
@@ -33,3 +33,4 @@ describe "JsInjector", ->
     callback = jasmine.createSpy "callback"
     jsInjector.onCodeInjected(callback)
     expect(@connectionManager.onCodeLoaded).toHaveBeenCalledWith(callback)
+###

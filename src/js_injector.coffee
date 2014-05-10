@@ -16,7 +16,14 @@ class JsInjector
   ###
 
   constructor: (@connectionManager) ->
-    taskFunctionsList = []
+    @taskFunctionsList = {}
+    @callback = { 
+      onAck: (socket, taskId) -> 
+        @socketsState[socket].push taskId
+      onError: (socket, taskId) ->
+        console.log "Callback error::Socket: #{socket}::taskId: #{taskId} !"
+    }
+    @socketsState = {}
 
   ###*
   # Inject code, takes as parameter task id and task processing function
@@ -30,17 +37,21 @@ class JsInjector
 
     if runFun != null
       console.log "CodeInjector:Loading code for task #{taskId}..."
-      taskFunctionsList[taskId] = runFun;
-      for client in @connectionManager.getActiveConnections()
-        @connectionManager.sendNewTaskToPeer(client, taskId, taskFunctionsList[taskId])
+      @taskFunctionsList[taskId] = runFun;
+      for socket in @connectionManager.getActiveConnections()
+        @socketsState[socket]? = []
+        @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @callback)
       console.log "CodeInjector::Code loaded for task #{taskId} !"
     else 
-      console.log "CodeInjectror::Complementing clients for task #{taskId}..."
-      if @connectionManager.onCodeLoaded != 'code_loaded'
-        @connectionManager.sendNewTaskToPeer(client, taskId, taskFunctionsList[taskId])
+      console.log "CodeInjector::Complementing sockets for task #{taskId}..."
+      for socket in @connectionManager.getActiveConnections()
+        if not @socketsState[socket]? then
+          @socketsState[socket] = []
+        if not taskId in @socketsState[socket] then
+          @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @callback)
 
   ###*
-  # Unloads code from clients, code is recognized by task id.
+  # Unloads code from sockets, code is recognized by task id.
   # @method unloadCode  
   # @param {Integer} taskId specified task identificator
   ###
@@ -48,15 +59,15 @@ class JsInjector
   unloadCode: (taskId) ->
 
     console.log "CodeInjector:Unloading code for task: ", taskId
-    for client in @connectionManager.getActiveConnections()
-      @connectionManager.deleteTaskFromPeer(client, taskId)
-    taskFunctionsList[taskId].delete
+    for socket in @connectionManager.getActiveConnections()
+      @connectionManager.deleteTaskFromPeer(socket, taskId, @callback)
+    @taskFunctionsList[taskId].delete
     console.log "CodeInjector:Code unloaded for task: ", taskId
 
   ###*
-  # Callback run when code is injected to specified client
+  # Callback run when code is injected to specified socket
   # @method onCodeInjected
-  # @param {Function} callback a callback can get client id as a param
+  # @param {Function} callback a callback can get socket id as a param
   ###
 
   onCodeInjected: (callback) -> 
