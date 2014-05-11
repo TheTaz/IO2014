@@ -6,7 +6,7 @@ class JobDispatcher
   JobStatus =
     waiting : 1
     sent : 2
-    executing: 3	
+    executed: 3	
 
   constructor: (@connectionManager)->
     @tasksJobsStatus={}
@@ -74,6 +74,17 @@ class JobDispatcher
   onPeerCapabilitiesChanged: (peerSocket) ->
     @tryToAssignAvailableJobs(peerSocket)
 
+  ###*
+  # Serves finished job, tries to dispatch capable tasks to the peer that finished the job.
+  # @method onJobDone
+  # @param {Object} peerSocket peers socket
+  # @param {Id} taskId unique id of the task that job belongs to
+  # @param {Id} jobId unique id of the job that was finished
+  ###
+  onJobDone: (peerSocket, taskId, jobId) ->
+    @tasksJobsStatus[taskId][jobId]=JobStatus.executed
+    @tryToAssignAvailableJobs(peerSocket)
+	
   ###*
   # Dispatches waiting jobs to the newly connected peer.
   # @method onPeerConnected
