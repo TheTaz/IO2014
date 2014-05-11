@@ -74,8 +74,17 @@ class JobDispatcher
       for task in @tasksParamsWaiting
         sendParamsToPeer(peerSocket, task, Object.keys(@tasksParamsWaiting[task])[0])
 
-  onPeerDisconnected: () ->
-
+  ###*
+  # Dispatches waiting jobs to the peer.
+  # @method onPeerDisconnected
+  # @param {Object} jobsToReassign peers socket {taskId : {jobId : jobParams}}
+  ###
+  onPeerDisconnected: (jobsToReassign) ->
+    for task in jobsToReassign
+      for job in jobsToReassign[task]
+        @tasksParamsWaiting[task][job]=jobsToReassign[task][job]
+        @tasksJobs[task][job]=JobStatus.waiting
+	
   ###*
   # Sends parameters to the peer.
   # @method sendParamsToPeer
