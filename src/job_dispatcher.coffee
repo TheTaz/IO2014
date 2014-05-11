@@ -1,3 +1,5 @@
+ConnectionManager = require "../src/connection_manager"
+
 ###*
 # JobDispatcher class.
 # @class JobDispatcher
@@ -19,7 +21,6 @@ class JobDispatcher
 
     clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
-
     splitParams = taskSplitMethod(taskParams, clients.length)
     data = (packageTaskParams(id, params) for params in splitParams)
     @connectionManager.executeJobOnPeer(@getNextClient(), id, d) for d in data
@@ -32,6 +33,7 @@ class JobDispatcher
   stopTask: (taskId) ->
     # Stub method
     clients = @connectionManager.getActiveConnections()
+    if (not clients?) then return undefined #todo
     deleteTaskFromPeer(client, taskId) for client in clients
     console.log "Stopping task: ", taskId
 	
