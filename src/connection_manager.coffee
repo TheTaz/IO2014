@@ -134,6 +134,9 @@ class ConnectionManager extends events.EventEmitter
     socket.emit 'executeJob', message
     return message.msgId
 
+  deleteJobFromPeer: (socket, taskId, jobId) ->
+    #stub method
+
   ###*
   # Sends acknowledgment message to given client
   # @method sendAckToPeer

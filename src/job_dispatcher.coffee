@@ -46,14 +46,17 @@ class JobDispatcher
           i++
 	  
   ###*
-  # Stops the specified task
+  # Stops dispatching and executing jobs for the specified task
   # @method stopTask
   # @param {Id} taskId unique id of the task that will be stopped
   ###
   stopTask: (taskId) ->
+    delete @tasksParamsWaiting[taskId]
     clients = @connectionManager.getActiveConnections()
-    if (not clients?) then return undefined
-    deleteTaskFromPeer(client, taskId) for client in clients
+    if clients
+      for job in @tasksJobsStatus[taskId]
+        if @tasksJobsStatus[taskId][job] == JobStatus.sent
+          deleteJobFromPeer(client, taskId, job) for client in clients
     delete @tasksJobsStatus[taskId]
     console.log "Stopping task: ", taskId
 	
