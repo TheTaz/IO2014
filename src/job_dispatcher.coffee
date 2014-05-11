@@ -85,7 +85,7 @@ class JobDispatcher
           sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])		
 
   ###*
-  # Dispatches waiting jobs to the peer.
+  # Dispatches waiting jobs to the newly connected peer.
   # @method onPeerConnected
   # @param {Object} peerSocket peers socket
   ###	
@@ -96,7 +96,7 @@ class JobDispatcher
           sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
 
   ###*
-  # Dispatches waiting jobs to the peer.
+  # Enqueues undone jobs after peer disconnection.
   # @method onPeerDisconnected
   # @param {Object} jobsToReassign {taskId : {jobId : jobParams}}
   ###
