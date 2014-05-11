@@ -4,13 +4,13 @@ describe "my webdriverjs tests", ->
 
     client = {}
     token = ""
-
+    
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 9999999
 
     beforeEach ->
         client = webdriverjs.remote({
             desiredCapabilities: {
-                browserName: 'chrome'
+                browserName: process.env.browser
             }
         })
         client.init()
