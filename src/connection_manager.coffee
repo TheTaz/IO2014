@@ -1,3 +1,6 @@
+events = require('events');
+
+
 ###*
 # @module server
 ###
@@ -9,7 +12,6 @@ events = require 'events'
 # @class ConnectionManager
 ###
 class ConnectionManager extends events.EventEmitter
-
   ###*
   # Initializes message counters
   # @class ConnectionManager

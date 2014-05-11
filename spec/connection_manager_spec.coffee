@@ -142,4 +142,4 @@ describe "ConnectionManager", ->
 
         @connectionManager.onResult socket, payload
         expect(@connectionManager.emit).toHaveBeenCalledWith "resultReady", socket, payload.data
-        
+

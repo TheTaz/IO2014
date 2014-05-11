@@ -31,7 +31,7 @@ class AdminConsole
     # @property resultAgregator
     # @type {ResultAggregator}
     ###
-    @resultAgregator = new ResultAggregator(@dispatcher)
+    @resultAgregator = new ResultAggregator(@connectionManager)
 
     ###*
     # Object responsible for task management
