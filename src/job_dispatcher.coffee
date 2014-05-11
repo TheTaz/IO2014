@@ -4,11 +4,13 @@
 ###
 class JobDispatcher
   JobStatus =
-    sent : 1
-    executing: 2	
+    waiting : 1
+    sent : 2
+    executing: 3	
 
   constructor: (@connectionManager)->
     @tasksJobs={}
+    @tasksParamsWaiting={}
 
   ###*
   # @method dipatchTask
@@ -22,16 +24,22 @@ class JobDispatcher
       taskId: id
       params: params
 
-    clients = @connectionManager.getActiveConnections()
-    if (not clients?) then return undefined #todo
     @tasksJobs[id]={}
-    splitParams = taskSplitMethod(taskParams, clients.length)
+    @tasksParamsWaiting[id]={}
+    splitParams = taskSplitMethod(taskParams)
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 1
     for d in data
-      @connectionManager.executeJobOnPeer(@getNextClient(), id, i, d)
-      @tasksJobs[id][i]=JobStatus.sent
-
+      @tasksJobs[id][i]=JobStatus.waiting
+      @tasksParamsWaiting[id][i]=data
+      i++
+    clients = @connectionManager.getActiveConnections()
+    if clients
+      i = 1
+      for client in clients
+        sendParamsToPeer(client, id, i)
+        i++
+	  
   ###*
   # Stops the specified task
   # @method stopTask
@@ -53,18 +61,18 @@ class JobDispatcher
   ###	
   getJobs: (taskId) ->
     return @tasksJobs[taskId]
-	
-  
-  getNextClient: ->
-    clients = @connectionManager.getActiveConnections()
-    if (not clients?) then return undefined #todo
 
-    @clientNum = @clientNum ? 0
-    @clientNum = 0 if @clientNum >= clients.length
-    clients[@clientNum++]
+  peerCapabilitiesChanged: () ->
 
-  clientChoiceRuleExample: (data) ->
-    clients = @connectionManager.getActiveConnections()
-    return null
+  onPeerConnected: () ->
+
+  onPeerDisconnected: () ->
+
+  sendParamsToPeer: (peer, taskId, jobId) ->
+    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[id][i])
+    @tasksJobs[taskId][jobId]=JobStatus.sent
+    delete @tasksParamsWaiting[taskId][jobId]
+    if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
+      delete @tasksParamsWaiting[taskId]
 
 module.exports = JobDispatcher
