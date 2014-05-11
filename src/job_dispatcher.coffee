@@ -125,7 +125,11 @@ class JobDispatcher
       else 
         return Math.max(jobsNumber/(peers.length),1)
     return Math.min(jobsNumber,4)
-	
+
+  ###*
+  # Tries to assign to peer as many available tasks as peers capabilities and getNumberOfJobsToAssign() allows it.
+  # @method tryToAssignAvailableJobs
+  ###
   tryToAssignAvailableJobs: (peerSocket) ->
     capabilities = @connectionManager.getPeerCapabilities(peerSocket)
     howMany = getNumberOfJobsToAssign()
