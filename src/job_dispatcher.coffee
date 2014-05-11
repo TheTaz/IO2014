@@ -42,7 +42,7 @@ class JobDispatcher
       for client in clients
         capabilities=@connectionManager.getPeerCapabilities(client)
         if id in capabilities
-          sendParamsToPeer(client, id, i)
+          @sendParamsToPeer(client, id, i)
           i++
 	  
   ###*
@@ -115,7 +115,7 @@ class JobDispatcher
   # @param {Id} jobId jobs unique id
   ###
   sendParamsToPeer: (peer, taskId, jobId) ->
-    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[id][i])
+    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId])
     @tasksJobsStatus[taskId][jobId]=JobStatus.sent
     delete @tasksParamsWaiting[taskId][jobId]
     if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
@@ -151,7 +151,7 @@ class JobDispatcher
       for task in @tasksParamsWaiting
         if task in capabilities
           for job in @tasksParamsWaiting[task]
-            sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+            @sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
             howMany--
             if howMany == 0
               break
