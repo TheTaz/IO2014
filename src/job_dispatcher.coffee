@@ -9,7 +9,7 @@ class JobDispatcher
     executing: 3	
 
   constructor: (@connectionManager)->
-    @tasksJobs={}
+    @tasksJobsStatus={}
     @tasksParamsWaiting={}
 
   ###*
@@ -24,13 +24,13 @@ class JobDispatcher
       taskId: id
       params: params
 
-    @tasksJobs[id]={}
+    @tasksJobsStatus[id]={}
     @tasksParamsWaiting[id]={}
     splitParams = taskSplitMethod(taskParams)
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 1
     for d in data
-      @tasksJobs[id][i]=JobStatus.waiting
+      @tasksJobsStatus[id][i]=JobStatus.waiting
       @tasksParamsWaiting[id][i]=data
       i++
     clients = @connectionManager.getActiveConnections()
@@ -50,7 +50,7 @@ class JobDispatcher
     clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
     deleteTaskFromPeer(client, taskId) for client in clients
-    delete @tasksJobs[taskId]
+    delete @tasksJobsStatus[taskId]
     console.log "Stopping task: ", taskId
 	
 
@@ -60,9 +60,30 @@ class JobDispatcher
   # @param {Id} taskId unique id of the task that will be examined
   ###	
   getJobs: (taskId) ->
-    return @tasksJobs[taskId]
-
-  peerCapabilitiesChanged: () ->
+    return @tasksJobsStatus[taskId]
+  
+  ###*
+  # Serves change in peer capabilities.
+  # @method onPeerCapabilitiesChangeds
+  # @param {Object} peerSocket peers socket
+  # @param {Object} executingJobs info about jobs currently in execution
+  # @param {Object} rejectedJobs info about jobs rejected by peer
+  # @param {Integer} jobsPeerCanTake number of jobs peer can still take
+  ###
+  onPeerCapabilitiesChanged: (peerSocket, executingJobs, rejectedJobs, jobsPeerCanTake) ->
+    if executingJobs
+      for task in executingJobs
+        for job in executingJobs[task]
+          @tasksJobsStatus[task][job]=JobStatus.executing
+    if rejectedJobs
+      for task in rejectedJobs
+        for job in rejectedJobs[task]
+          @tasksParamsWaiting[task][job]=rejectedJobs[task][job]
+          @tasksJobsStatus[task][job]=JobStatus.waiting
+    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
+      for task in @tasksParamsWaiting
+        for job in @tasksParamsWaiting[task]
+          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])		
 
   ###*
   # Dispatches waiting jobs to the peer.
@@ -72,18 +93,19 @@ class JobDispatcher
   onPeerConnected: (peerSocket) ->
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
       for task in @tasksParamsWaiting
-        sendParamsToPeer(peerSocket, task, Object.keys(@tasksParamsWaiting[task])[0])
+        for job in @tasksParamsWaiting[task]
+          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
 
   ###*
   # Dispatches waiting jobs to the peer.
   # @method onPeerDisconnected
-  # @param {Object} jobsToReassign peers socket {taskId : {jobId : jobParams}}
+  # @param {Object} jobsToReassign {taskId : {jobId : jobParams}}
   ###
   onPeerDisconnected: (jobsToReassign) ->
     for task in jobsToReassign
       for job in jobsToReassign[task]
         @tasksParamsWaiting[task][job]=jobsToReassign[task][job]
-        @tasksJobs[task][job]=JobStatus.waiting
+        @tasksJobsStatus[task][job]=JobStatus.waiting
 	
   ###*
   # Sends parameters to the peer.
@@ -94,7 +116,7 @@ class JobDispatcher
   ###
   sendParamsToPeer: (peer, taskId, jobId) ->
     @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[id][i])
-    @tasksJobs[taskId][jobId]=JobStatus.sent
+    @tasksJobsStatus[taskId][jobId]=JobStatus.sent
     delete @tasksParamsWaiting[taskId][jobId]
     if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
       delete @tasksParamsWaiting[taskId]
