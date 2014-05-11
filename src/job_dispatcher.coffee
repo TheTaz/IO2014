@@ -26,14 +26,17 @@ class JobDispatcher
 
     @tasksJobsStatus[id]={}
     @tasksParamsWaiting[id]={}
-    splitParams = taskSplitMethod(taskParams)
+    clients = @connectionManager.getActiveConnections()
+    splitInto=min(taskParams.length,10)
+    if clients
+      splitInto=min(taskParams.length,2*clients.length)
+    splitParams = taskSplitMethod(taskParams, splitInto)
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 1
     for d in data
       @tasksJobsStatus[id][i]=JobStatus.waiting
       @tasksParamsWaiting[id][i]=data
       i++
-    clients = @connectionManager.getActiveConnections()
     if clients
       i = 1
       for client in clients
@@ -69,7 +72,7 @@ class JobDispatcher
   # @param {Object} rejectedJobs info about jobs rejected by peer
   # @param {Integer} jobsPeerCanTake number of jobs peer can still take
   ###
-  onPeerCapabilitiesChanged: (peerSocket, executingJobs, rejectedJobs, jobsPeerCanTake) ->
+  onPeerCapabilitiesChanged: () ->
     if executingJobs
       for task in executingJobs
         for job in executingJobs[task]
@@ -82,7 +85,7 @@ class JobDispatcher
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
       for task in @tasksParamsWaiting
         for job in @tasksParamsWaiting[task]
-          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])		
+          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
 
   ###*
   # Dispatches waiting jobs to the newly connected peer.
@@ -120,4 +123,23 @@ class JobDispatcher
     if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
       delete @tasksParamsWaiting[taskId]
 
+  ###*
+  # Returns the number of jobs that should be assigned to the peer.
+  # @method getNumberOfJobsToAssign
+  ###
+  getNumberOfJobsToAssign: ->
+    jobsNumber = 0
+    for task in @tasksParamsWaiting
+        for job in @tasksParamsWaiting[task]
+          jobsNumber++
+    if jobsNumber == 0
+      return 0
+    peers = @connectionManager.getActiveConnections()
+    if peers
+      if peers.length >= jobsNumber or peers.length==0
+        return jobsNumber
+      else 
+        return max(jobsNumber/(peers.length),1)
+    return min(jobsNumber,4)
+		
 module.exports = JobDispatcher
