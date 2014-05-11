@@ -5,7 +5,12 @@ ConnectionManager = require "../src/connection_manager"
 # @class JobDispatcher
 ###
 class JobDispatcher
+  JobStatus =
+    sent : 1
+    executing: 2	
+
   constructor: (@connectionManager)->
+    @tasksJobs={}
 
   ###*
   # @method dipatchTask
@@ -21,9 +26,13 @@ class JobDispatcher
 
     clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
+    @tasksJobs[id]={}
     splitParams = taskSplitMethod(taskParams, clients.length)
     data = (packageTaskParams(id, params) for params in splitParams)
-    @connectionManager.executeJobOnPeer(@getNextClient(), id, d) for d in data
+    i = 1
+    for d in data
+      @connectionManager.executeJobOnPeer(@getNextClient(), id, i, d)
+      @tasksJobs[id][i]=JobStatus.sent
 
   ###*
   # Stops the specified task
@@ -35,18 +44,17 @@ class JobDispatcher
     clients = @connectionManager.getActiveConnections()
     if (not clients?) then return undefined #todo
     deleteTaskFromPeer(client, taskId) for client in clients
+    delete @tasksJobs[taskId]
     console.log "Stopping task: ", taskId
 	
 
   ###*
-  # Returns list of currently running jobs for the specified task
+  # Returns list of currently serverd jobs {job : jobStatus} for the specified task
   # @method getJobs
   # @param {Id} id unique id of the task that will be examined
   ###	
   getJobs: (taskId) ->
-    clients = @connectionManager.getActiveConnections()
-    if (not clients?) then return undefined #todo
-    return clients #todo
+    return @tasksJobs[taskId]
 	
   
   getNextClient: ->
