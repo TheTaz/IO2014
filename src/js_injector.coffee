@@ -17,11 +17,17 @@ class JsInjector
 
   constructor: (@connectionManager) ->
     @taskFunctionsList = {}
-    @callback = { 
+    @injectCallback = { 
       onAck: (socket, taskId) -> 
         @socketsState[socket].push taskId
       onError: (socket, taskId) ->
-        console.log "Callback error::Socket: #{socket}::taskId: #{taskId} !"
+        console.log "Inject callback error::Socket: #{socket}::taskId: #{taskId} !"
+    }
+    @unloadCallback = {
+      onAck: (socket, taskId) ->
+        @socketsState[socket] = @socketsState[socket].filter (id) -> if id isnt taskId
+      onError: (socket, taskId) ->
+        console.log "Unload callback error::Socket: #{socket}::taskId: #{taskId} !"
     }
     @socketsState = {}
 
@@ -36,19 +42,20 @@ class JsInjector
   injectCode: (taskId, runFun = null) ->
 
     if runFun != null
-      console.log "CodeInjector:Loading code for task #{taskId}..."
+      console.log "CodeInjector:Loading code for task: #{taskId}..."
       @taskFunctionsList[taskId] = runFun;
       for socket in @connectionManager.getActiveConnections()
-        @socketsState[socket]? = []
-        @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @callback)
-      console.log "CodeInjector::Code loaded for task #{taskId} !"
+        @socketsState[socket] ?= []
+        if not taskId in @socketsState[socket]
+          @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback)
+      console.log "CodeInjector::Code loaded for task: #{taskId} !"
     else 
-      console.log "CodeInjector::Complementing sockets for task #{taskId}..."
+      console.log "CodeInjector::Complementing sockets for task: #{taskId}..."
       for socket in @connectionManager.getActiveConnections()
-        if not @socketsState[socket]? then
-          @socketsState[socket] = []
-        if not taskId in @socketsState[socket] then
-          @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @callback)
+        @socketsState[socket] ?= []
+        if not taskId in @socketsState[socket]
+          @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback)
+      console.log "CodeInjector::Sockets have been complemented for task: #{taskId} !"
 
   ###*
   # Unloads code from sockets, code is recognized by task id.
@@ -58,19 +65,10 @@ class JsInjector
 
   unloadCode: (taskId) ->
 
-    console.log "CodeInjector:Unloading code for task: ", taskId
+    console.log "CodeInjector::Unloading code for task: #{taskId}..."
     for socket in @connectionManager.getActiveConnections()
-      @connectionManager.deleteTaskFromPeer(socket, taskId, @callback)
-    @taskFunctionsList[taskId].delete
-    console.log "CodeInjector:Code unloaded for task: ", taskId
-
-  ###*
-  # Callback run when code is injected to specified socket
-  # @method onCodeInjected
-  # @param {Function} callback a callback can get socket id as a param
-  ###
-
-  onCodeInjected: (callback) -> 
-    @connectionManager.onCodeLoaded callback
+      @connectionManager.deleteTaskFromPeer(socket, taskId, @unloadCallback)
+    @taskFunctionsList[taskId] = null
+    console.log "CodeInjector::Code unloaded for task: #{taskId} !"
 
 module.exports = JsInjector
