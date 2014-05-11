@@ -42,7 +42,7 @@ class JsInjector
   injectCode: (taskId, runFun = null) ->
 
     if runFun != null
-      console.log "CodeInjector:Loading code for task: #{taskId}..."
+      console.log "CodeInjector::Loading code for task: #{taskId}..."
       @taskFunctionsList[taskId] = runFun;
       for socket in @connectionManager.getActiveConnections()
         @socketsState[socket] ?= []

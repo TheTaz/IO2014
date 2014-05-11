@@ -48,4 +48,3 @@ describe "JsInjector", ->
     for socket in @connectionManager.getActiveConnections
       expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(socket, taskId, @callback)
       expect(socketsState[socket]).toContain(null)   
-      

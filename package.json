@@ -31,7 +31,7 @@
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
         "test": "jasmine-node --coffee ./spec/",
-        "runselenium": "start-selenium",
+        "selenium": "start-selenium",
         "accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"
     }
 }
