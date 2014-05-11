@@ -64,11 +64,20 @@ class JobDispatcher
 
   peerCapabilitiesChanged: () ->
 
-  onPeerConnected: () ->
+  ###*
+  # Dispatches waiting jobs to the peer.
+  # @method onPeerConnected
+  # @param {Object} peerSocket peers socket
+  ###	
+  onPeerConnected: (peerSocket) ->
+    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
+      for task in @tasksParamsWaiting
+        sendParamsToPeer(peerSocket, task, Object.keys(@tasksParamsWaiting[task])[0])
 
   onPeerDisconnected: () ->
 
   ###*
+  # Sends parameters to the peer.
   # @method sendParamsToPeer
   # @param {Object} peers socket
   # @param {Id} taskId tasks unique id
