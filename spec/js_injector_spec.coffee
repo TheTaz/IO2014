@@ -7,7 +7,12 @@ describe "JsInjector", ->
 
   beforeEach ->
     @sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-    @connectionManager = jasmine.createSpyObj('connectionManager', ['getActiveConnections', 'sendNewTaskToPeer', 'deleteTaskFromPeer', 'onCodeLoaded'])
+    @connectionManager = {
+      getActiveConnections: jasmine.createSpy('getActiveConnections').and.returnValue([]),
+      sendNewTaskToPeer: jasmine.createSpy('sendNewTaskToPeer'),
+      deleteTaskFromPeer: jasmine.createSpy('deleteTaskFromPeer'),
+      onCodeLoaded: jasmine.createSpy('onCodeLoaded')
+    }
     @callback = jasmine.createSpy "callback"
 
     @jsInjector  = new JsInjector @connectionManager
