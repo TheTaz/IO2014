@@ -31,8 +31,7 @@
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
         "test": "jasmine-node --coffee ./spec/",
-        "runphantom": "start-selenium -Dphantomjs=\"/node_modules/phantomjs/bin/ \"",
-		"runchrome": "start-selenium",
+        "runselenium": "start-selenium",
         "acceptphantom": "jasmine-node --config browser phantomjs --captureExceptions --coffee ./acceptance_test/",
         "acceptchrome": "jasmine-node --config browser chrome --captureExceptions --coffee ./acceptance_test/"
     }
