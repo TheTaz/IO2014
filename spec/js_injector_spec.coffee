@@ -1,4 +1,3 @@
-
 describe "JsInjector", ->
   JsInjector = require "../src/js_injector"
 

@@ -41,7 +41,7 @@ module.exports = function(grunt) {
       options: {
         jshintrc: true
       },
-      all: ['src/**/*.js', 'spec/**/*.js']
+      all: ['src/**/*.js', 'spec/**/*.js', 'acceptance_test/**/*.js']
     },
     coffee_jshint: {
       options: {
@@ -54,6 +54,9 @@ module.exports = function(grunt) {
       },
       specs: {
         src: 'spec/**/*.coffee'
+      },
+      accceptance_tests: {
+        src: 'acceptance_test/**/*.coffee'
       }
     },
     yuidoc: {
