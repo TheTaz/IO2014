@@ -11,7 +11,7 @@ class ResultAggregator
     events.EventEmitter.call this
     @results = {}
 
-    @connectionManager.onResult (socket, payload) =>
+    @connectionManager.on 'resultReady', (socket, payload) =>
       @addResultFor(payload.taskId, payload.jobId, payload.jobResult)
 
   ###*
