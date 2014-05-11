@@ -14,7 +14,7 @@ adminEndpoint = '/admin'
 clientsIO = io.of clientsEndpoint
 adminIO = io.of adminEndpoint
 
-connectionManager = new ConnectionManager(clientsIO)
+connectionManager = new ConnectionManager(clientsIO, true)
 dispatcher = new JobDispatcher(connectionManager)
 
 initializeServer = () ->
