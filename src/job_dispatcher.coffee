@@ -13,7 +13,7 @@ class JobDispatcher
     @tasksParamsWaiting={}
 
   ###*
-  # @method dipatchTask
+  # @method dispatchTask
   # @param {Id} id task unique id
   # @param {Collection} taskParams parameters for a task
   # @param {Function} taskSplitMethod a function taking as parameters: task parameters and number of available clients 
@@ -43,7 +43,7 @@ class JobDispatcher
   ###*
   # Stops the specified task
   # @method stopTask
-  # @param {Id} id unique id of the task that will be stopped
+  # @param {Id} taskId unique id of the task that will be stopped
   ###
   stopTask: (taskId) ->
     # Stub method
@@ -55,9 +55,9 @@ class JobDispatcher
 	
 
   ###*
-  # Returns list of currently serverd jobs {job : jobStatus} for the specified task
+  # Returns list of currently served jobs {job : jobStatus} for the specified task
   # @method getJobs
-  # @param {Id} id unique id of the task that will be examined
+  # @param {Id} taskId unique id of the task that will be examined
   ###	
   getJobs: (taskId) ->
     return @tasksJobs[taskId]
@@ -68,6 +68,12 @@ class JobDispatcher
 
   onPeerDisconnected: () ->
 
+  ###*
+  # @method sendParamsToPeer
+  # @param {Object} peers socket
+  # @param {Id} taskId tasks unique id
+  # @param {Id} jobId jobs unique id
+  ###
   sendParamsToPeer: (peer, taskId, jobId) ->
     @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[id][i])
     @tasksJobs[taskId][jobId]=JobStatus.sent
