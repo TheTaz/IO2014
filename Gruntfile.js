@@ -6,7 +6,10 @@ module.exports = function(grunt) {
         src: 'bin'
       },
       coffee: {
-        src: 'bin/*.coffee'
+        src: 'bin/**/*.coffee'
+      },
+      publicScripts: {
+        src: 'bin/public_scripts'
       }
     },
     copy: {
@@ -16,13 +19,20 @@ module.exports = function(grunt) {
         src: '**',
         dest: 'bin/',
         filter: 'isFile'
+      },
+      publicScripts: {
+        expand: true,
+        cwd: 'bin/public_scripts',
+        src: '**',
+        dest: 'public/scripts',
+        filter: 'isFile'
       }
     },
     coffee: {
       glob_to_multiple: {
         expand: true,
         cwd: 'bin/',
-        src: ['*.coffee'],
+        src: '**/*.coffee',
         dest: 'bin/',
         ext: '.js'
       }
@@ -34,7 +44,11 @@ module.exports = function(grunt) {
       all: ['src/**/*.js', 'spec/**/*.js', 'acceptance_test/**/*.js']
     },
     coffee_jshint: {
-      options: {},
+      options: {
+        jshintrc: true,
+        jshintOptions: ['evil', "camelcase", "trailing"], // Why u no work?!
+        globals: ['console', 'require', 'module', 'jasmine', 'it', 'expect']
+      },
       source: {
         src: 'src/**/*.coffee'
       },
@@ -68,6 +82,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-coffee-jshint');
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
-  grunt.registerTask('default', ['jshint', 'clean:bin', 'copy', 'coffee', 'clean:coffee', 'yuidoc']);
-  
+  grunt.registerTask('default', [/*'coffee_jshint', */'clean:bin', 'copy:main', 'coffee', 'clean:coffee', 'copy:publicScripts', 'clean:publicScripts', 'yuidoc']);
+
 };
