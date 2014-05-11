@@ -2,11 +2,11 @@ ResultAggregator = require "../src/result_aggregator"
 
 describe "ResultAggregator", ->
   beforeEach ->
-    @connectionManager = jasmine.createSpyObj 'connectionManager', ["onResult"]
+    @connectionManager = jasmine.createSpyObj 'connectionManager', ["on"]
     @resultAggregator = new ResultAggregator(@connectionManager)
 
   it "adds callback to connectionManager", ->
-    expect(@connectionManager.onResult).toHaveBeenCalled()
+    expect(@connectionManager.on).toHaveBeenCalled()
 
   it "aggregates results", ->
     @merge_func = jasmine.createSpy("merge_func")
