@@ -46,9 +46,8 @@ class JobDispatcher
   # @param {Id} taskId unique id of the task that will be stopped
   ###
   stopTask: (taskId) ->
-    # Stub method
     clients = @connectionManager.getActiveConnections()
-    if (not clients?) then return undefined #todo
+    if (not clients?) then return undefined
     deleteTaskFromPeer(client, taskId) for client in clients
     delete @tasksJobsStatus[taskId]
     console.log "Stopping task: ", taskId
@@ -64,7 +63,7 @@ class JobDispatcher
   
   ###*
   # Serves change in peer capabilities.
-  # @method onPeerCapabilitiesChangeds
+  # @method onPeerCapabilitiesChanged
   # @param {Object} peerSocket peers socket
   # @param {Object} executingJobs info about jobs currently in execution
   # @param {Object} rejectedJobs info about jobs rejected by peer

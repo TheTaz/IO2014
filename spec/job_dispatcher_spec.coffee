@@ -26,4 +26,3 @@ describe "JobDispatcher", ->
 
   it "responds to disconnection of a peer", ->
     jobDispatcher.onPeerDisconnected({})
-	
