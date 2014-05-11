@@ -17,3 +17,13 @@ describe "JobDispatcher", ->
   it "retrieves jobs for specified task", ->
     jobDispatcher.getJobs(taskId)
     expect(connManager.getActiveConnections).toHaveBeenCalled
+
+  it "responds to changes in peers capabilities", ->
+    jobDispatcher.onPeerCapabilitiesChanged()
+
+  it "responds to connection of a new peer", ->
+    jobDispatcher.onPeerConnected()
+
+  it "responds to disconnection of a peer", ->
+    jobDispatcher.onPeerDisconnected({})
+	
