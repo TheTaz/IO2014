@@ -27,6 +27,7 @@ describe "JsInjector", ->
     expect(@connectionManager.getActiveConnections).toHaveBeenCalled
     for socket in @connectionManager.getActiveConnections
       expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(socket, taskId, runFun, @callback)
+      expect(socketsState[socket]).toContain(taskId)
 
  it "injects task processing function to clients without provided runFun", ->
     taskId = 1
@@ -36,11 +37,15 @@ describe "JsInjector", ->
     @jsInjector.injectCode(taskId)
     expect(taskFunctionList[taskId]).toContain(runFun)
     expect(@connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(socket, taskId, runFun, @callback)   
+    for socket in @connectionManager.getActiveConnections
+      expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(socket, taskId, runFun, @callback)
+      expect(socketsState[socket]).toContain(taskId)   
 
   it "unloads tasks from clients", ->
     taskId = 1
 
     @jsInjector.unloadCode(taskId)
     expect(@connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(socket, taskId, @callback)
+    for socket in @connectionManager.getActiveConnections
+      expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(socket, taskId, @callback)
+      expect(socketsState[socket]).toContain(null)   
