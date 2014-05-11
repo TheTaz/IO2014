@@ -86,15 +86,16 @@ class ConnectionManager extends events.EventEmitter
   ###
   sendNewTaskToPeer: (socket, taskId, runFun, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
-    if not runFun instanceof String and not typeof runFun is 'string'
-      runFun = '(' + runFun + ')'
-    message.data = {
-      taskId: taskId,
-      runFun: runFun
-    }
-    socket.emit 'addTask', message
-    return message.msgId
+    if message?
+      @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
+      if not runFun instanceof String and not typeof runFun is 'string'
+        runFun = '(' + runFun + ')'
+      message.data = {
+        taskId: taskId,
+        runFun: runFun
+      }
+      socket.emit 'addTask', message
+      return message.msgId
   
   ###*
   # Sends message to given client to delete task
@@ -106,12 +107,13 @@ class ConnectionManager extends events.EventEmitter
   ###
   deleteTaskFromPeer: (socket, taskId, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
-    message.data = {
-      taskId: taskId
-    }
-    socket.emit 'deleteTask', message
-    return message.msgId
+    if message?
+      @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
+      message.data = {
+        taskId: taskId
+      }
+      socket.emit 'deleteTask', message
+      return message.msgId
 
   ###*
   # Sends message to given client to execute job
@@ -125,14 +127,15 @@ class ConnectionManager extends events.EventEmitter
   ###
   executeJobOnPeer: (socket, taskId, jobId, jobArgs, callback) ->
     message = @generateNewMessage()
-    @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
-    message.data = {
-      taskId: taskId,
-      jobId: jobId,
-      jobArgs: jobArgs
-    }
-    socket.emit 'executeJob', message
-    return message.msgId
+    if message?
+      @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
+      message.data = {
+        taskId: taskId,
+        jobId: jobId,
+        jobArgs: jobArgs
+      }
+      socket.emit 'executeJob', message
+      return message.msgId
 
   ###*
   # Sends acknowledgment message to given client
@@ -214,7 +217,7 @@ class ConnectionManager extends events.EventEmitter
       console.log('Job: ' + payload.data.jobId)
       console.log('Result: ' + payload.data.jobResult)
       console.log('Sending acknowledgment to client')
-  
+
   ###*
   # Callback can take a connected client as a parametr
   # @method onPeerConnected
