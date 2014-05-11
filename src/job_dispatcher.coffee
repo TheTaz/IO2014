@@ -1,5 +1,3 @@
-ConnectionManager = require "../src/connection_manager"
-
 ###*
 # JobDispatcher class.
 # @class JobDispatcher
