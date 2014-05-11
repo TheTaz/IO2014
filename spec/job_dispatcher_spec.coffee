@@ -1,10 +1,11 @@
 describe "JobDispatcher", ->
-  JobDispatcher = require "../src/job_dispatcher"
-  ConnectionManager = require "../src/connection_manager"
-  sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-  connManager = new ConnectionManager(sockets)
-  jobDispatcher = new JobDispatcher(connManager)
-  taskId=1
+  beforeEach ->
+    JobDispatcher = require "../src/job_dispatcher"
+    ConnectionManager = require "../src/connection_manager"
+    sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
+    connManager = new ConnectionManager(sockets)
+    jobDispatcher = new JobDispatcher(connManager)
+    taskId=1
   
   it "dispatches specified task", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
