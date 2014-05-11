@@ -8,7 +8,7 @@
         "socket.io": "0.9.x"
     },
     "devDependencies": {
-        "jasmine-node": "1.14.x",
+        "jasmine-node": "2.0",
         "coffee-script": "1.7.x",
         "grunt": "0.4.x",
         "yuidocjs": "0.3.x",
@@ -32,7 +32,6 @@
         "start": "node ./bin/server.js",
         "test": "jasmine-node --coffee ./spec/",
         "runselenium": "start-selenium",
-        "acceptphantom": "jasmine-node --config browser phantomjs --captureExceptions --coffee ./acceptance_test/",
-        "acceptchrome": "jasmine-node --config browser chrome --captureExceptions --coffee ./acceptance_test/"
+        "accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"
     }
 }
