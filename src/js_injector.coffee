@@ -25,7 +25,7 @@ class JsInjector
     }
     @unloadCallback = {
       onAck: (socket, taskId) ->
-        @socketsState[socket] = @socketsState[socket].filter (id) -> if id isnt taskId
+        @socketsState[socket] = @socketsState[socket].filter (id) -> id isnt taskId
       onError: (socket, taskId) ->
         console.log "Unload callback error::Socket: #{socket}::taskId: #{taskId} !"
     }

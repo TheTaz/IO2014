@@ -1,36 +1,41 @@
-###
+
 describe "JsInjector", ->
   JsInjector = require "../src/js_injector"
 
-  dummyTask = null
-  client = null
-  jsInjector = null
   taskFunctionList = {}
+  socketsState = {}
 
   beforeEach ->
-    dummyTask =
-      taskId: 1;
-      runFun: (inputObj) -> true
-      taskFunctionList[taskId] = runFun
-    @client = jasmine.createSpy "client"
+    @sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
     @connectionManager = jasmine.createSpyObj('connectionManager', ['getActiveConnections', 'sendNewTaskToPeer', 'deleteTaskFromPeer', 'onCodeLoaded'])
-    jsInjector  = new JsInjector @connectionManager
+    @callback = jasmine.createSpy "callback"
 
-  it "injects task processing function to clients", ->
-    taskId = dummyTask.taskId
-    runFun = dummyTask.runFun
-    jsInjector.injectCode(taskId, runFun)
+    @jsInjector  = new JsInjector @connectionManager
+
+  it "injects task processing function to clients with provided runFun", ->
+    taskId = 1
+    runFun = "(function(){ return 0; })"
+    taskFunctionList[taskId] = runFun
+
+    @jsInjector.injectCode(taskId, runFun)
+    expect(taskFunctionList[taskId]).toContain(runFun)
     expect(@connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(taskId, runFun)
+    for socket in @connectionManager.getActiveConnections
+      expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(socket, taskId, runFun, @callback)
+
+ it "injects task processing function to clients without provided runFun", ->
+    taskId = 1
+    runFun = "(function(){ return 0; })"
+    taskFunctionList[taskId] = runFun
+
+    @jsInjector.injectCode(taskId)
+    expect(taskFunctionList[taskId]).toContain(runFun)
+    expect(@connectionManager.getActiveConnections).toHaveBeenCalled
+    expect(@connectionManager.sendNewTaskToPeer).toHaveBeenCalledWith(socket, taskId, runFun, @callback)   
 
   it "unloads tasks from clients", ->
-    taskId = dummyTask.taskId
-    jsInjector.unloadCode(taskId)
-    expect(@connectionManager.getActiveConnections).toHaveBeenCalled
-    expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(taskId)
+    taskId = 1
 
-  it "callback when code has been injected", ->
-    callback = jasmine.createSpy "callback"
-    jsInjector.onCodeInjected(callback)
-    expect(@connectionManager.onCodeLoaded).toHaveBeenCalledWith(callback)
-###
+    @jsInjector.unloadCode(taskId)
+    expect(@connectionManager.getActiveConnections).toHaveBeenCalled
+    expect(@connectionManager.deleteTaskFromPeer).toHaveBeenCalledWith(socket, taskId, @callback)
