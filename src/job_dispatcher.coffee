@@ -27,9 +27,9 @@ class JobDispatcher
     @tasksJobsStatus[id]={}
     @tasksParamsWaiting[id]={}
     clients = @connectionManager.getActiveConnections()
-    splitInto=min(taskParams.length,10)
+    splitInto=Math.min(taskParams.length,10)
     if clients
-      splitInto=min(taskParams.length,2*clients.length)
+      splitInto=Math.min(taskParams.length,2*clients.length)
     splitParams = taskSplitMethod(taskParams, splitInto)
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 1
@@ -40,8 +40,10 @@ class JobDispatcher
     if clients
       i = 1
       for client in clients
-        sendParamsToPeer(client, id, i)
-        i++
+        capabilities=@connectionManager.getPeerCapabilities(client)
+        if id in capabilities
+          sendParamsToPeer(client, id, i)
+          i++
 	  
   ###*
   # Stops the specified task
@@ -65,27 +67,12 @@ class JobDispatcher
     return @tasksJobsStatus[taskId]
   
   ###*
-  # Serves change in peer capabilities.
+  # Serves change in peer capabilities, tries to dispatch capable tasks.
   # @method onPeerCapabilitiesChanged
   # @param {Object} peerSocket peers socket
-  # @param {Object} executingJobs info about jobs currently in execution
-  # @param {Object} rejectedJobs info about jobs rejected by peer
-  # @param {Integer} jobsPeerCanTake number of jobs peer can still take
   ###
-  onPeerCapabilitiesChanged: () ->
-    if executingJobs
-      for task in executingJobs
-        for job in executingJobs[task]
-          @tasksJobsStatus[task][job]=JobStatus.executing
-    if rejectedJobs
-      for task in rejectedJobs
-        for job in rejectedJobs[task]
-          @tasksParamsWaiting[task][job]=rejectedJobs[task][job]
-          @tasksJobsStatus[task][job]=JobStatus.waiting
-    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
-      for task in @tasksParamsWaiting
-        for job in @tasksParamsWaiting[task]
-          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+  onPeerCapabilitiesChanged: (peerSocket) ->
+    @tryToAssignAvailableJobs(peerSocket)
 
   ###*
   # Dispatches waiting jobs to the newly connected peer.
@@ -93,10 +80,7 @@ class JobDispatcher
   # @param {Object} peerSocket peers socket
   ###	
   onPeerConnected: (peerSocket) ->
-    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
-      for task in @tasksParamsWaiting
-        for job in @tasksParamsWaiting[task]
-          sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+    @tryToAssignAvailableJobs(peerSocket)
 
   ###*
   # Enqueues undone jobs after peer disconnection.
@@ -139,7 +123,19 @@ class JobDispatcher
       if peers.length >= jobsNumber or peers.length==0
         return jobsNumber
       else 
-        return max(jobsNumber/(peers.length),1)
-    return min(jobsNumber,4)
-		
+        return Math.max(jobsNumber/(peers.length),1)
+    return Math.min(jobsNumber,4)
+	
+  tryToAssignAvailableJobs: (peerSocket) ->
+    capabilities = @connectionManager.getPeerCapabilities(peerSocket)
+    howMany = getNumberOfJobsToAssign()
+    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
+      for task in @tasksParamsWaiting
+        if task in capabilities
+          for job in @tasksParamsWaiting[task]
+            sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+            howMany--
+            if howMany == 0
+              break
+
 module.exports = JobDispatcher
