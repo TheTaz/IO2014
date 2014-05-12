@@ -39,10 +39,13 @@ class JobDispatcher
     
     addTask: (taskId) ->
       if(@taskJobs[taskId]==undefined)
-        @taskJobs[taskId]={}
+        @taskJobs[taskId]=[]
     
-    addJobToTask: (taskId, job) ->
-      @taskJobs[taskId][job.id]=job
+    addJobToTask: (job, taskId) ->
+      @taskJobs[taskId].push(job)
+    
+    removeTask: (taskId) ->
+      delete @taskJobs[taskId]
     
     getTaskIds: ->
       return Object.keys(@taskJobs)	
@@ -50,6 +53,20 @@ class JobDispatcher
     getTaskJobs: (taskId) ->
       return @taskJobs[taskId]
     
+    getTaskWaitingJobs: (taskId) ->
+      jobs=[]
+      for job in @taskJobs[taskId]
+        if job.isWaiting
+          jobs.push(job)
+      return jobs
+    
+    getWaitingJobs: ->
+      jobs={}
+      for task in @getTaskIds()
+        waiting=@getTaskWaitingJobs()
+        if waiting!=[]
+          jobs[task]=waiting
+      return jobs
 
   ###*
   # Provides the mechanism for creating and managing jobs.
@@ -59,10 +76,12 @@ class JobDispatcher
   # @param {Object} reference to js injector
   ###
   constructor: (@connectionManager, @jsInjector)->
-    @tasksJobsStatus={}
-    @tasksJobsParams={}
-    @tasksParamsWaiting={}
-    @jobToPeerAssignment={}
+    #@tasksJobsStatus={}
+    #@tasksJobsParams={}
+    #@tasksParamsWaiting={}
+    #@jobToPeerAssignment={}
+    
+    @tasks=new TaskCollection()
 
   ###*
   # @method dispatchTask
@@ -76,8 +95,9 @@ class JobDispatcher
       taskId: id
       params: params
 
-    @tasksJobsStatus[id]={}
-    @tasksParamsWaiting[id]={}
+    #@tasksJobsStatus[id]={}
+    #@tasksParamsWaiting[id]={}
+    @tasks.addTask(id)
     clients = @connectionManager.getActiveConnections()
     splitInto=Math.min(taskParams.length,10)
     if clients
@@ -86,8 +106,9 @@ class JobDispatcher
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 1
     for d in data
-      @tasksJobsStatus[id][i]=JobStatus.waiting
-      @tasksParamsWaiting[id][i]=data
+      @tasks.addJobToTask((new Job(i,data)),id)
+      #@tasksJobsStatus[id][i]=JobStatus.waiting
+      #@tasksParamsWaiting[id][i]=data
       i++
     if clients
       i = 1
