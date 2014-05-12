@@ -48,6 +48,9 @@ class JobDispatcher
     removeTask: (taskId) ->
       delete @taskJobs[taskId]
     
+    removeJobFromTask: (job, taskId) ->
+      @taskJobs[taskId]=@taskJobs[taskId].filter (j) -> j isnt job
+    
     getTaskIds: ->
       return Object.keys(@taskJobs)	
 	
@@ -111,19 +114,17 @@ class JobDispatcher
           i++
 
   ###*
-  # Stops dispatching and executing jobs for the specified task
-  # @method stopTask
-  # @param {Id} taskId unique id of the task that will be stopped
+  # Stops dispatching and executing job.
+  # @method stopJob
+  # @param {Id} taskId unique id of the task that job belongs to.
+  # @param {Id} jobId id of the job to be stopped.
   ###
-  stopTask: (taskId) ->
-    clients = @connectionManager.getActiveConnections()
-    if clients
-      for job in tasks.getTaskJobs(taskId)
-        if job.isSent()
-          @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id) for client in clients
-    tasks.removeTask(taskId)
-    console.log "Stopping task: ", taskId
-	
+  stopJob: (taskId, jobId) ->
+    for job in @tasks.getTaskJobs(taskId)
+      if job.id==jobId and job.isSent()
+        @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id)
+		@tasks.removeJobFromTask(job,taskId)
+        console.log "Stopping task: ", taskId
 
   ###*
   # Returns list of currently served jobs {job : jobStatus} for the specified task
