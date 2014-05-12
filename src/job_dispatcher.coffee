@@ -8,6 +8,13 @@ class JobDispatcher
     sent : 2
     executed: 3	
 
+  ###*
+  # Provides the mechanism for creating and managing jobs.
+  # @class JobDispatcher
+  # @constructor
+  # @param {Object} reference to connection manager
+  # @param {Object} reference to js injector
+  ###
   constructor: (@connectionManager, @jsInjector)->
     @tasksJobsStatus={}
     @tasksParamsWaiting={}
