@@ -102,14 +102,14 @@ class JobDispatcher
     for d in data
       @tasks.addJobToTask((new Job(i,data)),id)
       i++
-    if clients
+    if clients #todo clients len < params len
       i = 1
       for client in clients
         capabilities=@jsInjector.getPeerCapabilities(client)
         if id in capabilities
-          @sendParamsToPeer(client, id, i)
+          @sendParamsToPeer(client, id, @tasks.getJobTasks(id)[i])
           i++
-	  
+
   ###*
   # Stops dispatching and executing jobs for the specified task
   # @method stopTask
@@ -181,13 +181,9 @@ class JobDispatcher
   # @param {Id} taskId tasks unique id
   # @param {Id} jobId jobs unique id
   ###
-  sendParamsToPeer: (peer, taskId, jobId) ->
-    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId])
-    @tasksJobsStatus[taskId][jobId]=JobStatus.sent
-    @jobToPeerAssignment[taskId][jobId]=peer
-    delete @tasksParamsWaiting[taskId][jobId]
-    if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
-      delete @tasksParamsWaiting[taskId]
+  sendParamsToPeer: (peer, taskId, job) ->
+    @connectionManager.executeJobOnPeer(peer, taskId, job.id, @tasksParamsWaiting[taskId][jobId])
+    job.setAsSent(peer)
 
   ###*
   # Returns the number of jobs that should be assigned to the peer.
@@ -195,8 +191,9 @@ class JobDispatcher
   ###
   getNumberOfJobsToAssign: ->
     jobsNumber = 0
-    for task in @tasksParamsWaiting
-        for job in @tasksParamsWaiting[task]
+    waiting=@tasks.getWaitingJobs()
+    for task in Object.keys(waiting)
+        for job in waiting[task]
           jobsNumber++
     if jobsNumber == 0
       return 0
