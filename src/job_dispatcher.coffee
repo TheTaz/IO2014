@@ -182,7 +182,7 @@ class JobDispatcher
   # @param {Id} jobId jobs unique id
   ###
   sendParamsToPeer: (peer, taskId, job) ->
-    @connectionManager.executeJobOnPeer(peer, taskId, job.id, @tasksParamsWaiting[taskId][jobId])
+    @connectionManager.executeJobOnPeer(peer, taskId, job.id, job.params)
     job.setAsSent(peer)
 
   ###*
@@ -212,11 +212,11 @@ class JobDispatcher
   tryToAssignAvailableJobs: (peerSocket) ->
     capabilities = @jsInjector.getPeerCapabilities(peerSocket)
     howMany = @getNumberOfJobsToAssign()
-    if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
-      for task in @tasksParamsWaiting
+	waiting=@tasks.getWaitingJobs()
+    for task in Object.keys(waiting)
         if task in capabilities
           for job in @tasksParamsWaiting[task]
-            @sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+            @sendParamsToPeer(peerSocket, task, job.params)
             howMany--
             if howMany == 0
               break
