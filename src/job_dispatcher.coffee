@@ -131,7 +131,7 @@ class JobDispatcher
   # @param {Id} taskId unique id of the task that will be examined
   ###	
   getJobs: (taskId) ->
-    return @tasksJobsStatus[taskId]
+    return @tasks.getTaskJobs(taskId)
   
   ###*
   # Serves change in peer capabilities, tries to dispatch capable tasks.
@@ -149,7 +149,10 @@ class JobDispatcher
   # @param {Id} jobId unique id of the job that was finished
   ###
   onJobDone: (peerSocket, taskId, jobId) ->
-    @tasksJobsStatus[taskId][jobId]=JobStatus.executed
+    taskJobs=@tasks.getTaskJobs(taskId)
+    for job in taskJobs
+      if job.id==jobId
+        job.setAsExecuted()
     @tryToAssignAvailableJobs(peerSocket)
 	
   ###*
@@ -161,24 +164,15 @@ class JobDispatcher
     @tryToAssignAvailableJobs(peerSocket)
 
   ###*
-  # Enqueues undone jobs after peer disconnection.
+  # Sets undone jobs as waiting after peer disconnection.
   # @method onPeerDisconnected
   # @param {Object} peers socket
   ###
   onPeerDisconnected: (peerSocket) ->
-    for task in Object.keys(@jobToPeerAssignment)
-      for job in Object.keys(@jobToPeerAssignment[task])
-	    if @jobToPeerAssignment[task][job] == peerSocket
-          if @tasksParamsWaiting[task] == undefined
-            @tasksParamsWaiting[task]={}
-          @tasksParamsWaiting[task][job]=jobToPeerAssignment[task][job] {taskId : {jobId : {peer:peer}}}
-          @tasksJobsStatus[task][job]=JobStatus.waiting
-    for task in Object.keys(jobsToReassign)
-      for job in Object.keys(jobsToReassign[task])
-        if @tasksParamsWaiting[task] == undefined
-          @tasksParamsWaiting[task]={}
-        @tasksParamsWaiting[task][job]=jobsToReassign[task][job]
-        @tasksJobsStatus[task][job]=JobStatus.waiting
+    for task in tasks.getTaskIds()
+      for job in tasks.getTaskJobs(task)
+        if job.peer == peerSocket
+          job.setAsWaiting()
 	
   ###*
   # Sends parameters to the peer.
