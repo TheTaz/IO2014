@@ -11,9 +11,9 @@ describe "JobDispatcher", ->
     sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
     connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","getPeerCapabilities","executeJobOnPeer"]
     getConn = () -> ["client1","client2"]
-    connManager.getActiveConnections.andCallFake(getConn)
+    connManager.getActiveConnections.and.callFake(getConn)
     getCap = (socket, taskId, jobId) -> [1]
-    connManager.getPeerCapabilities.andCallFake(getCap)
+    connManager.getPeerCapabilities.and.callFake(getCap)
     jobDispatcher = new JobDispatcher(connManager)
 
   it "dispatches specified task", ->
