@@ -20,10 +20,15 @@ describe "JobDispatcher", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     expect(jobDispatcher.tasksJobsStatus[taskId]).toEqual({1 : 2, 2 : 2})
     expect(connManager.getActiveConnections).toHaveBeenCalled()
+    expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 	
   it "stops specified task", ->
+    jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.stopTask(taskId)
-    #expect(connManager.deleteJobFromPeer).toHaveBeenCalled()
+    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client1",1,'1')
+    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client1",1,'2')
+    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client2",1,'1')
+    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client2",1,'2')
   
   it "retrieves jobs for specified task", ->
     jobDispatcher.getJobs(taskId)

@@ -54,9 +54,9 @@ class JobDispatcher
     delete @tasksParamsWaiting[taskId]
     clients = @connectionManager.getActiveConnections()
     if clients
-      for job in @tasksJobsStatus[taskId]
+      for job in Object.keys(@tasksJobsStatus[taskId])
         if @tasksJobsStatus[taskId][job] == JobStatus.sent
-          deleteJobFromPeer(client, taskId, job) for client in clients
+          @connectionManager.deleteJobFromPeer(client, taskId, job) for client in clients
     delete @tasksJobsStatus[taskId]
     console.log "Stopping task: ", taskId
 	
