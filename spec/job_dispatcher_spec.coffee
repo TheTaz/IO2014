@@ -31,8 +31,9 @@ describe "JobDispatcher", ->
     expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client2",1,'2')
   
   it "retrieves jobs for specified task", ->
-    jobDispatcher.getJobs(taskId)
-    #expect(connManager.getActiveConnections).toHaveBeenCalled()
+    jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
+    result=jobDispatcher.getJobs(taskId)
+    expect(result).toEqual({1 : 2, 2 : 2})
 
   it "responds to changes in peers capabilities", ->
     #jobDispatcher.onPeerCapabilitiesChanged()
