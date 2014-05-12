@@ -3,10 +3,53 @@
 # @class JobDispatcher
 ###
 class JobDispatcher
-  JobStatus =
-    waiting : 1
-    sent : 2
-    executed: 3	
+  class Job
+    JobStatus =
+      waiting : 1
+      sent : 2
+      executed: 3	
+    
+	constructor: (@id, @params) ->
+      @status=JobStatus.waiting
+      @peer=undefined
+    
+    setAsWaiting: ->
+      @status=JobStatus.waiting
+	
+    setAsSent: (peer) ->
+      @peer=peer
+      @status=JobStatus.sent
+    
+    setAsExecuted: ->
+      @peer=undefined
+      @status=JobStatus.executed
+    
+    isWaiting: ->
+      return @status==JobStatus.waiting
+
+    isSent: ->
+      return @status==JobStatus.sent
+    
+    isExecuted: ->
+      return @status==JobStatus.executed
+  
+  class TaskCollection
+    constructor: ->
+      @taskJobs={}
+    
+    addTask: (taskId) ->
+      if(@taskJobs[taskId]==undefined)
+        @taskJobs[taskId]={}
+    
+    addJobToTask: (taskId, job) ->
+      @taskJobs[taskId][job.id]=job
+    
+    getTaskIds: ->
+      return Object.keys(@taskJobs)	
+	
+    getTaskJobs: (taskId) ->
+      return @taskJobs[taskId]
+    
 
   ###*
   # Provides the mechanism for creating and managing jobs.
@@ -17,7 +60,9 @@ class JobDispatcher
   ###
   constructor: (@connectionManager, @jsInjector)->
     @tasksJobsStatus={}
+    @tasksJobsParams={}
     @tasksParamsWaiting={}
+    @jobToPeerAssignment={}
 
   ###*
   # @method dispatchTask
@@ -106,9 +151,16 @@ class JobDispatcher
   ###*
   # Enqueues undone jobs after peer disconnection.
   # @method onPeerDisconnected
-  # @param {Object} jobsToReassign {taskId : {jobId : jobParams}}
+  # @param {Object} peers socket
   ###
-  onPeerDisconnected: (jobsToReassign) ->
+  onPeerDisconnected: (peerSocket) ->
+    for task in Object.keys(@jobToPeerAssignment)
+      for job in Object.keys(@jobToPeerAssignment[task])
+	    if @jobToPeerAssignment[task][job] == peerSocket
+          if @tasksParamsWaiting[task] == undefined
+            @tasksParamsWaiting[task]={}
+          @tasksParamsWaiting[task][job]=jobToPeerAssignment[task][job] {taskId : {jobId : {peer:peer}}}
+          @tasksJobsStatus[task][job]=JobStatus.waiting
     for task in Object.keys(jobsToReassign)
       for job in Object.keys(jobsToReassign[task])
         if @tasksParamsWaiting[task] == undefined
@@ -126,6 +178,7 @@ class JobDispatcher
   sendParamsToPeer: (peer, taskId, jobId) ->
     @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId])
     @tasksJobsStatus[taskId][jobId]=JobStatus.sent
+    @jobToPeerAssignment[taskId][jobId]=peer
     delete @tasksParamsWaiting[taskId][jobId]
     if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
       delete @tasksParamsWaiting[taskId]
