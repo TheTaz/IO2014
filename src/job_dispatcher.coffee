@@ -3,75 +3,6 @@
 # @class JobDispatcher
 ###
 class JobDispatcher
-  class Job
-    JobStatus =
-      waiting : 1
-      sent : 2
-      executed: 3	
-    
-	constructor: (@id, @params) ->
-      @status=JobStatus.waiting
-      @peer=undefined
-    
-    setAsWaiting: ->
-      @peer=undefined
-      @status=JobStatus.waiting
-	
-    setAsSent: (peer) ->
-      @peer=peer
-      @status=JobStatus.sent
-    
-    setAsExecuted: ->
-      @peer=undefined
-      @status=JobStatus.executed
-    
-    isWaiting: ->
-      return @status==JobStatus.waiting
-
-    isSent: ->
-      return @status==JobStatus.sent
-    
-    isExecuted: ->
-      return @status==JobStatus.executed
-  
-  class TaskCollection
-    constructor: ->
-      @taskJobs={}
-    
-    addTask: (taskId) ->
-      if(@taskJobs[taskId]==undefined)
-        @taskJobs[taskId]=[]
-    
-    addJobToTask: (job, taskId) ->
-      @taskJobs[taskId].push(job)
-    
-    removeTask: (taskId) ->
-      delete @taskJobs[taskId]
-    
-    removeJobFromTask: (job, taskId) ->
-      @taskJobs[taskId]=@taskJobs[taskId].filter (j) -> j isnt job
-    
-    getTaskIds: ->
-      return Object.keys(@taskJobs)	
-	
-    getTaskJobs: (taskId) ->
-      return @taskJobs[taskId]
-    
-    getTaskWaitingJobs: (taskId) ->
-      jobs=[]
-      for job in @taskJobs[taskId]
-        if job.isWaiting
-          jobs.push(job)
-      return jobs
-    
-    getWaitingJobs: ->
-      jobs={}
-      for task in @getTaskIds()
-        waiting=@getTaskWaitingJobs()
-        if waiting!=[]
-          jobs[task]=waiting
-      return jobs
-
   ###*
   # Provides the mechanism for creating and managing jobs.
   # @class JobDispatcher
@@ -81,6 +12,72 @@ class JobDispatcher
   ###
   constructor: (@connectionManager, @jsInjector)->
     @tasks=new TaskCollection()
+
+  class Job
+    @JobStatus : {waiting : 1, sent : 2, executed: 3}
+
+    constructor: (@id, @params) ->
+      @status=Job.JobStatus.waiting
+      @peer=undefined	
+
+    setAsWaiting: ->
+      @peer=undefined
+      @status=Job.JobStatus.waiting
+
+    setAsSent: (peer) ->
+      @peer=peer
+      @status=Job.JobStatus.sent
+
+    setAsExecuted: ->
+      @peer=undefined
+      @status=Job.JobStatus.executed
+
+    isWaiting: ->
+      return @status==Job.JobStatus.waiting
+
+    isSent: ->
+      return @status==Job.JobStatus.sent
+
+    isExecuted: ->
+      return @status==Job.JobStatus.executed
+
+  class TaskCollection
+    constructor: ->
+      @taskJobs={}
+
+    addTask: (taskId) ->
+      if(@taskJobs[taskId]==undefined)
+        @taskJobs[taskId]=[]
+
+    addJobToTask: (job, taskId) ->
+      @taskJobs[taskId].push(job)
+
+    removeTask: (taskId) ->
+      delete @taskJobs[taskId]
+
+    removeJobFromTask: (job, taskId) ->
+      @taskJobs[taskId]=@taskJobs[taskId].filter (j) -> j isnt job
+
+    getTaskIds: ->
+      return Object.keys(@taskJobs)
+
+    getTaskJobs: (taskId) ->
+      return @taskJobs[taskId]
+
+    getTaskWaitingJobs: (taskId) ->
+      jobs=[]
+      for job in @taskJobs[taskId]
+        if job.isWaiting()
+          jobs.push(job)
+      return jobs
+
+    getWaitingJobs: ->
+      jobs={}
+      for task in @getTaskIds()
+        waiting=@getTaskWaitingJobs()
+        if waiting!=[]
+          jobs[task]=waiting
+      return jobs
 
   ###*
   # @method dispatchTask
@@ -110,7 +107,7 @@ class JobDispatcher
       for client in clients
         capabilities=@jsInjector.getPeerCapabilities(client)
         if id in capabilities
-          @sendParamsToPeer(client, id, @tasks.getJobTasks(id)[i])
+          @sendParamsToPeer(client, id, @tasks.getTaskJobs(id)[i])
           i++
 
   ###*
@@ -123,7 +120,7 @@ class JobDispatcher
     for job in @tasks.getTaskJobs(taskId)
       if job.id==jobId and job.isSent()
         @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id)
-		@tasks.removeJobFromTask(job,taskId)
+        @tasks.removeJobFromTask(job,taskId)
         console.log "Stopping task: ", taskId
 
   ###*
@@ -213,7 +210,7 @@ class JobDispatcher
   tryToAssignAvailableJobs: (peerSocket) ->
     capabilities = @jsInjector.getPeerCapabilities(peerSocket)
     howMany = @getNumberOfJobsToAssign()
-	waiting=@tasks.getWaitingJobs()
+    waiting=@tasks.getWaitingJobs()
     for task in Object.keys(waiting)
         if task in capabilities
           for job in @tasksParamsWaiting[task]
