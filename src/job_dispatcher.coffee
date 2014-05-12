@@ -8,7 +8,7 @@ class JobDispatcher
     sent : 2
     executed: 3	
 
-  constructor: (@connectionManager)->
+  constructor: (@connectionManager, @jsInjector)->
     @tasksJobsStatus={}
     @tasksParamsWaiting={}
 
@@ -40,7 +40,7 @@ class JobDispatcher
     if clients
       i = 1
       for client in clients
-        capabilities=@connectionManager.getPeerCapabilities(client)
+        capabilities=@jsInjector.getPeerCapabilities(client)
         if id in capabilities
           @sendParamsToPeer(client, id, i)
           i++
@@ -147,7 +147,7 @@ class JobDispatcher
   # @method tryToAssignAvailableJobs
   ###
   tryToAssignAvailableJobs: (peerSocket) ->
-    capabilities = @connectionManager.getPeerCapabilities(peerSocket)
+    capabilities = @jsInjector.getPeerCapabilities(peerSocket)
     howMany = @getNumberOfJobsToAssign()
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
       for task in @tasksParamsWaiting

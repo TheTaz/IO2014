@@ -1,20 +1,21 @@
 JobDispatcher = require "../src/job_dispatcher"
-ConnectionManager = require "../src/connection_manager"
 
 describe "JobDispatcher", ->
   sockets = null
   connManager = null
+  injector = null
   jobDispatcher = null
   taskId=1
 
   beforeEach ->
     sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","getPeerCapabilities","executeJobOnPeer"]
+    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer"]
     getConn = () -> ["client1","client2"]
     connManager.getActiveConnections.and.callFake(getConn)
+    injector = jasmine.createSpyObj "injector", ["getPeerCapabilities"]
     getCap = (socket, taskId, jobId) -> [1]
-    connManager.getPeerCapabilities.and.callFake(getCap)
-    jobDispatcher = new JobDispatcher(connManager)
+    injector.getPeerCapabilities.and.callFake(getCap)
+    jobDispatcher = new JobDispatcher(connManager,injector)
 
   it "dispatches specified task", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
@@ -38,13 +39,13 @@ describe "JobDispatcher", ->
   it "responds to changes in peers capabilities", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onPeerCapabilitiesChanged("client1")
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 
   it "responds to connection of a new peer", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onPeerConnected("client1")
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 
   it "responds to disconnection of a peer", ->
@@ -57,5 +58,5 @@ describe "JobDispatcher", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onJobDone("client1",taskId,1)
     expect(jobDispatcher.tasksJobsStatus[taskId][1]).toEqual(3)
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
