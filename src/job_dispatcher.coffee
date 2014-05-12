@@ -102,8 +102,10 @@ class JobDispatcher
   # @param {Object} jobsToReassign {taskId : {jobId : jobParams}}
   ###
   onPeerDisconnected: (jobsToReassign) ->
-    for task in jobsToReassign
-      for job in jobsToReassign[task]
+    for task in Object.keys(jobsToReassign)
+      for job in Object.keys(jobsToReassign[task])
+        if @tasksParamsWaiting[task] == undefined
+          @tasksParamsWaiting[task]={}
         @tasksParamsWaiting[task][job]=jobsToReassign[task][job]
         @tasksJobsStatus[task][job]=JobStatus.waiting
 	
