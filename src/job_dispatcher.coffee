@@ -146,7 +146,7 @@ class JobDispatcher
   ###
   tryToAssignAvailableJobs: (peerSocket) ->
     capabilities = @connectionManager.getPeerCapabilities(peerSocket)
-    howMany = getNumberOfJobsToAssign()
+    howMany = @getNumberOfJobsToAssign()
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
       for task in @tasksParamsWaiting
         if task in capabilities

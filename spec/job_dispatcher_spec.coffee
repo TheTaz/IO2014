@@ -36,7 +36,10 @@ describe "JobDispatcher", ->
     expect(result).toEqual({1 : 2, 2 : 2})
 
   it "responds to changes in peers capabilities", ->
-    #jobDispatcher.onPeerCapabilitiesChanged()
+    jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
+    jobDispatcher.onPeerCapabilitiesChanged()
+    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 
   it "responds to connection of a new peer", ->
     #jobDispatcher.onPeerConnected()
