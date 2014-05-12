@@ -14,6 +14,7 @@ class JobDispatcher
       @peer=undefined
     
     setAsWaiting: ->
+      @peer=undefined
       @status=JobStatus.waiting
 	
     setAsSent: (peer) ->
@@ -76,11 +77,6 @@ class JobDispatcher
   # @param {Object} reference to js injector
   ###
   constructor: (@connectionManager, @jsInjector)->
-    #@tasksJobsStatus={}
-    #@tasksJobsParams={}
-    #@tasksParamsWaiting={}
-    #@jobToPeerAssignment={}
-    
     @tasks=new TaskCollection()
 
   ###*
@@ -95,8 +91,6 @@ class JobDispatcher
       taskId: id
       params: params
 
-    #@tasksJobsStatus[id]={}
-    #@tasksParamsWaiting[id]={}
     @tasks.addTask(id)
     clients = @connectionManager.getActiveConnections()
     splitInto=Math.min(taskParams.length,10)
@@ -107,8 +101,6 @@ class JobDispatcher
     i = 1
     for d in data
       @tasks.addJobToTask((new Job(i,data)),id)
-      #@tasksJobsStatus[id][i]=JobStatus.waiting
-      #@tasksParamsWaiting[id][i]=data
       i++
     if clients
       i = 1
@@ -124,13 +116,12 @@ class JobDispatcher
   # @param {Id} taskId unique id of the task that will be stopped
   ###
   stopTask: (taskId) ->
-    delete @tasksParamsWaiting[taskId]
     clients = @connectionManager.getActiveConnections()
     if clients
-      for job in Object.keys(@tasksJobsStatus[taskId])
-        if @tasksJobsStatus[taskId][job] == JobStatus.sent
-          @connectionManager.deleteJobFromPeer(client, taskId, job) for client in clients
-    delete @tasksJobsStatus[taskId]
+      for job in tasks.getTaskJobs(taskId)
+        if job.isSent()
+          @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id) for client in clients
+    tasks.removeTask(taskId)
     console.log "Stopping task: ", taskId
 	
 
