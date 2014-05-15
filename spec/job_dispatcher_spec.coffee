@@ -9,7 +9,7 @@ describe "JobDispatcher", ->
 
   beforeEach ->
     sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer"]
+    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer","onPeerConnected","onPeerDisconnected"]
     getConn = () -> ["client1"]
     connManager.getActiveConnections.and.callFake(getConn)
     injector = jasmine.createSpyObj "injector", ["getPeerCapabilities"]
