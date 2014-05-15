@@ -194,7 +194,7 @@ class JobDispatcher
   # @method sendParamsToPeer
   # @param {Object} peers socket
   # @param {Id} taskId tasks unique id
-  # @param {Id} jobId jobs unique id
+  # @param {Object} job object
   ###
   sendParamsToPeer: (peer, taskId, job) ->
     @connectionManager.executeJobOnPeer(peer, taskId, job.id, job.params)
