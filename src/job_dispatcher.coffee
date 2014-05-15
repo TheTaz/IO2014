@@ -57,6 +57,8 @@ class JobDispatcher
 
     removeJobFromTask: (job, taskId) ->
       @taskJobs[taskId]=@taskJobs[taskId].filter (j) -> j isnt job
+      if @taskJobs[taskId]=={}
+        delete @taskJobs[taskId]
 
     getTaskIds: ->
       return Object.keys(@taskJobs)
@@ -64,7 +66,16 @@ class JobDispatcher
     getTaskJobs: (taskId) ->
       return @taskJobs[taskId]
 
+    getJob: (taskId, jobId) ->
+      if @taskJobs[taskId]==undefined
+        return
+      for job in @taskJobs[taskId]
+        if job.id == jobId
+          return job
+
     getTaskWaitingJobs: (taskId) ->
+      if @taskJobs[taskId]==undefined
+        return
       jobs=[]
       for job in @taskJobs[taskId]
         if job.isWaiting()
@@ -75,7 +86,7 @@ class JobDispatcher
       jobs={}
       for task in @getTaskIds()
         waiting=@getTaskWaitingJobs()
-        if waiting!=[]
+        if waiting!=[] and waiting!=undefined
           jobs[task]=waiting
       return jobs
 
@@ -102,13 +113,16 @@ class JobDispatcher
     for d in data
       @tasks.addJobToTask((new Job(i,data)),id)
       i++
-    if clients #todo clients len < params len
-      i = 1
+    jobs=@tasks.getTaskJobs(id)
+    i-=2
+    if clients
       for client in clients
+        if i==0
+          break
         capabilities=@jsInjector.getPeerCapabilities(client)
         if id in capabilities
-          @sendParamsToPeer(client, id, @tasks.getTaskJobs(id)[i])
-          i++
+          @sendParamsToPeer(client, id, jobs[i])
+          i--
 
   ###*
   # Stops dispatching and executing job.
@@ -117,11 +131,11 @@ class JobDispatcher
   # @param {Id} jobId id of the job to be stopped.
   ###
   stopJob: (taskId, jobId) ->
-    for job in @tasks.getTaskJobs(taskId)
-      if job.id==jobId and job.isSent()
-        @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id)
-        @tasks.removeJobFromTask(job,taskId)
-        console.log "Stopping task: ", taskId
+    job=@tasks.getJob(taskId, jobId)
+    if job !=undefined and job.isSent()
+      @connectionManager.deleteJobFromPeer(job.peer, taskId, job.id)
+      @tasks.removeJobFromTask(job,taskId)
+      console.log "Stopping task: ", taskId
 
   ###*
   # Returns list of currently served jobs {job : jobStatus} for the specified task
@@ -147,10 +161,9 @@ class JobDispatcher
   # @param {Id} jobId unique id of the job that was finished
   ###
   onJobDone: (peerSocket, taskId, jobId) ->
-    taskJobs=@tasks.getTaskJobs(taskId)
-    for job in taskJobs
-      if job.id==jobId
-        job.setAsExecuted()
+    job=@tasks.getJob(taskId, jobId)
+    if job !=undefined
+      job.setAsExecuted()
     @tryToAssignAvailableJobs(peerSocket)
 	
   ###*
@@ -167,8 +180,8 @@ class JobDispatcher
   # @param {Object} peers socket
   ###
   onPeerDisconnected: (peerSocket) ->
-    for task in tasks.getTaskIds()
-      for job in tasks.getTaskJobs(task)
+    for task in @tasks.getTaskIds()
+      for job in @tasks.getTaskJobs(task)
         if job.peer == peerSocket
           job.setAsWaiting()
 	
@@ -214,9 +227,9 @@ class JobDispatcher
     for task in Object.keys(waiting)
         if task in capabilities
           for job in @tasksParamsWaiting[task]
-            @sendParamsToPeer(peerSocket, task, job.params)
-            howMany--
             if howMany == 0
               break
+            @sendParamsToPeer(peerSocket, task, job.params)
+            howMany--
 
 module.exports = JobDispatcher
