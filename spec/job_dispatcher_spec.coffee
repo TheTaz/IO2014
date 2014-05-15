@@ -9,10 +9,10 @@ describe "JobDispatcher", ->
 
   beforeEach ->
     sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer","onPeerConnected","onPeerDisconnected"]
+    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer","onPeerConnected","onPeerDisconnected","onJobDone"]
     getConn = () -> ["client1"]
     connManager.getActiveConnections.and.callFake(getConn)
-    injector = jasmine.createSpyObj "injector", ["getPeerCapabilities"]
+    injector = jasmine.createSpyObj "injector", ["getPeerCapabilities","onPeerCapabilitiesChanged"]
     getCap = (socket, taskId, jobId) -> [1]
     injector.getPeerCapabilities.and.callFake(getCap)
     jobDispatcher = new JobDispatcher(connManager,injector)

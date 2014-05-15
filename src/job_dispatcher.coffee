@@ -14,6 +14,8 @@ class JobDispatcher
     @tasks=new TaskCollection()
     @connectionManager.onPeerConnected(@onPeerConnected)
     @connectionManager.onPeerDisconnected(@onPeerDisconnected)
+    @connectionManager.onJobDone(@onJobDone)
+    @jsInjector.onPeerCapabilitiesChanged(@onPeerCapabilitiesChanged)
 
   class Job
     @JobStatus : {waiting : 1, sent : 2, executed: 3}
