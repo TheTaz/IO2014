@@ -28,6 +28,22 @@ describe "Task ordering tests:", ->
       )
       .call(done)
 
-    
+  it "successfully orders a valid task", (done) ->
+    fs = require("fs")
+    task = fs.readFileSync("./example_task.js", "utf8")
+    client
+      .url('http://localhost:3000/admin.html')
+      .setValue("#command",task, (err)-> 
+        expect(err).toBeNull()
+      )
+      .buttonClick("#sendCommand",(err)->
+        expect(err).toBeNull()
+      )
+      .getValue("#progressContainer textarea", (err, value)->
+        expect(err).toBeNull()
+        expect(value).toEqual("Converting circular structure to JSON")
+      )
+      .call(done)
+
   afterEach (done) ->
     client.end(done)
