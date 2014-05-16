@@ -71,4 +71,8 @@ class JsInjector
     @taskFunctionsList[taskId] = null
     console.log "CodeInjector::Code unloaded for task: #{taskId} !"
 
+  onPeerCapabilitiesChanged: (callback) ->
+    #method stub
+    @onPeerCapabilitiesChangedCallback=callback
+
 module.exports = JsInjector

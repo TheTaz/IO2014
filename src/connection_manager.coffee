@@ -238,6 +238,10 @@ class ConnectionManager extends events.EventEmitter
   onPeerDisconnected: (callback) ->
     @sockets.on 'disconnect', callback
 
+  onJobDone: (callback) ->
+    #method stub
+    @onJobDoneCallback=callback
+
   ###*
   # @method getActiveConnections
   # @return a list of currently connected clients

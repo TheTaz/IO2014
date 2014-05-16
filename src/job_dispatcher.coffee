@@ -15,7 +15,8 @@ class JobDispatcher
     @connectionManager.onPeerConnected(@onPeerConnected)
     @connectionManager.onPeerDisconnected(@onPeerDisconnected)
     @connectionManager.onJobDone(@onJobDone)
-    @jsInjector.onPeerCapabilitiesChanged(@onPeerCapabilitiesChanged)
+    if jsInjector
+      @jsInjector.onPeerCapabilitiesChanged(@onPeerCapabilitiesChanged)
 
   class Job
     @JobStatus : {waiting : 1, sent : 2, executed: 3}
@@ -93,6 +94,10 @@ class JobDispatcher
         if waiting!=[] and waiting!=undefined
           jobs[task]=waiting
       return jobs
+
+  setJsInjector: (injector) ->
+    @jsInjector=injector
+    @jsInjector.onPeerCapabilitiesChanged(@onPeerCapabilitiesChanged)
 
   ###*
   # @method dispatchTask

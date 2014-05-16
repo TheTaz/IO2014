@@ -26,6 +26,8 @@ class AdminConsole
     ###
     @jsInjector = new JsInjector(@connectionManager)
 
+    @dispatcher.setJsInjector(@jsInjector)
+
     ###*
     # Object responsible for aggregating results sent from clients
     # @property resultAgregator
