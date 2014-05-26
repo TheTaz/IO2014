@@ -71,4 +71,12 @@ class JsInjector
     @taskFunctionsList[taskId] = null
     console.log "CodeInjector::Code unloaded for task: #{taskId} !"
 
+  ###*
+  # Returns socketsState map.
+  # @method getPeerCapabilities
+  ###
+
+  getPeerCapabilities: () ->
+    return @socketsState
+
 module.exports = JsInjector
