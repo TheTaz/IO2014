@@ -5,7 +5,7 @@ events = require('events');
 # @class ResultAggregator
 # @constructor  
 ###
-class ResultAggregator
+class ResultAggregator extends events.EventEmitter
 
   constructor: (@connectionManager) ->
     events.EventEmitter.call this
@@ -13,6 +13,7 @@ class ResultAggregator
 
     @connectionManager.on 'resultReady', (socket, payload) =>
       @addResultFor(payload.taskId, payload.jobId, payload.jobResult)
+      @onPartialResult payload.taskId
 
   ###*
   # Forget specific task
@@ -42,6 +43,15 @@ class ResultAggregator
     if @results[taskId]
       partialResults: @results[taskId].partialResults,
       mergedResult: @results[taskId].taskMergeFun(result for jobId, result of @results[taskId].partialResults)
+
+  ###*
+  # Emits event containing information about given task update
+  # and number of jobs already computed
+  # @method onPartialResult
+  # @param {Integer} taskId identifier of the task
+  ###
+  onPartialResult: (taskId) ->
+    @emit 'partialResultReady', taskId, Object.keys(@results[taskId].partialResults).length
 
   ###*
   # Aggregates result for given job in given task
