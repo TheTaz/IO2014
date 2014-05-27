@@ -148,7 +148,10 @@ class Admin
     taskId = payload.taskId
     result = payload.result
     taskResult = @taskResultPrefix + taskId + @taskResultInfix + result + @taskResultPostfix
-    $("#progressBar_" + taskId).replaceWith(taskResult)
+    try
+      $("#progressBar_" + taskId).replaceWith(taskResult)
+    catch error
+      console.log "No progress bar for given taskId"
 
   ###*
   # Handler called when task progress needs to be updated
@@ -158,7 +161,10 @@ class Admin
   onProgress: (payload) ->
     taskId = payload.taskId
     progress = payload.progress
-    @increaseProgress($("#progressBar_" + taskId)[0], progress)
+    try
+      @increaseProgress($("#progressBar_" + taskId)[0], progress)
+    catch error
+      console.log "No progress bar for given taskId"
 
 admin = new Admin()
 
