@@ -15,6 +15,7 @@
         "webdriverjs": "1.6.x",
         "phantomjs": "1.9.x",
         "selenium-standalone": "2.41.x",
+        "ibrik": "1.1.1",
         "grunt-contrib-coffee": "0.10.x",
         "grunt-contrib-clean": "0.5.x",
         "grunt-contrib-copy": "0.5.x",
@@ -32,6 +33,8 @@
         "start": "node ./bin/server.js",
         "test": "jasmine-node --coffee ./spec/",
         "selenium": "start-selenium",
+        "covspec": "./tools/covspec.sh",
+        "covacc": "./tools/covacc.sh",
         "accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"
     }
 }

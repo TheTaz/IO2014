@@ -14,3 +14,6 @@
 # dumps
 dump.*
 public/scripts
+
+# coverage files
+/coverage
