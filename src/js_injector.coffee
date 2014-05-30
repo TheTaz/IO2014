@@ -66,8 +66,8 @@ class JsInjector
   injectCodeToNewPeer: (socket) ->
     @connectionManager.on('peerConnected', function: (socket) ->
       @socketsState[socket] ?= []
-      for task in @taskFunctionsList
-          @connectionManager.sendNewTaskToPeer(socket, task, @taskFunctionsList[taskId], @injectCallback))
+      for taskId in @taskFunctionsList
+          @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback))
 
   ###*
   # Unloads code from sockets, code is recognized by task id.
