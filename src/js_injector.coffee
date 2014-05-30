@@ -58,6 +58,18 @@ class JsInjector
       console.log "CodeInjector::Sockets have been complemented for task: #{taskId} !"
 
   ###*
+  # Injects code to new peer when connected
+  # @method injectCodeToNewPeer
+  # @param {Object} socket 
+  ###
+
+  injectCodeToNewPeer: (socket) ->
+    @connectionManager.on('peerConnected', function: (socket) ->
+      @socketsState[socket] ?= []
+      for task in @taskFunctionsList
+          @connectionManager.sendNewTaskToPeer(socket, task, @taskFunctionsList[taskId], @injectCallback))
+
+  ###*
   # Unloads code from sockets, code is recognized by task id.
   # @method unloadCode  
   # @param {Integer} taskId specified task identificator
