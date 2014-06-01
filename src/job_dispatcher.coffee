@@ -6,7 +6,7 @@ class JobDispatcher
   JobStatus =
     waiting : 1
     sent : 2
-    executed: 3	
+    executed: 3
 
   constructor: (@connectionManager)->
     @tasksJobsStatus={}
@@ -16,7 +16,7 @@ class JobDispatcher
   # @method dispatchTask
   # @param {Id} id task unique id
   # @param {Collection} taskParams parameters for a task
-  # @param {Function} taskSplitMethod a function taking as parameters: task parameters and number of available clients 
+  # @param {Function} taskSplitMethod a function taking as parameters: task parameters and number of available clients
   ###
   dispatchTask: (id, taskParams, taskSplitMethod) ->
     packageTaskParams = (id, params) ->
@@ -44,7 +44,7 @@ class JobDispatcher
         if id in capabilities
           @sendParamsToPeer(client, id, i)
           i++
-	  
+
   ###*
   # Stops dispatching and executing jobs for the specified task
   # @method stopTask
@@ -59,16 +59,16 @@ class JobDispatcher
           @connectionManager.deleteJobFromPeer(client, taskId, job) for client in clients
     delete @tasksJobsStatus[taskId]
     console.log "Stopping task: ", taskId
-	
+
 
   ###*
   # Returns list of currently served jobs {job : jobStatus} for the specified task
   # @method getJobs
   # @param {Id} taskId unique id of the task that will be examined
-  ###	
+  ###
   getJobs: (taskId) ->
     return @tasksJobsStatus[taskId]
-  
+
   ###*
   # Serves change in peer capabilities, tries to dispatch capable tasks.
   # @method onPeerCapabilitiesChanged
@@ -87,12 +87,12 @@ class JobDispatcher
   onJobDone: (peerSocket, taskId, jobId) ->
     @tasksJobsStatus[taskId][jobId]=JobStatus.executed
     @tryToAssignAvailableJobs(peerSocket)
-	
+
   ###*
   # Dispatches waiting jobs to the newly connected peer.
   # @method onPeerConnected
   # @param {Object} peerSocket peers socket
-  ###	
+  ###
   onPeerConnected: (peerSocket) ->
     @tryToAssignAvailableJobs(peerSocket)
 
@@ -108,7 +108,7 @@ class JobDispatcher
           @tasksParamsWaiting[task]={}
         @tasksParamsWaiting[task][job]=jobsToReassign[task][job]
         @tasksJobsStatus[task][job]=JobStatus.waiting
-	
+
   ###*
   # Sends parameters to the peer.
   # @method sendParamsToPeer
@@ -138,7 +138,7 @@ class JobDispatcher
     if peers
       if peers.length >= jobsNumber or peers.length==0
         return jobsNumber
-      else 
+      else
         return Math.max(jobsNumber/(peers.length),1)
     return Math.min(jobsNumber,4)
 

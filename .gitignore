@@ -1,9 +1,6 @@
 # nodejs stuff
 /node_modules
 
-# binaries dir
-/bin
-
 #documentation
 /docs
 
@@ -13,4 +10,3 @@
 
 # dumps
 dump.*
-public/scripts

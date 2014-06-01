@@ -2,40 +2,6 @@ module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
-    clean:
-      bin: './bin/'
-      coffee: './bin/**/*.coffee'
-
-    copy:
-      main:
-        expand: true
-        cwd: './src/'
-        src: '**'
-        dest: './bin/'
-        filter: 'isFile'
-
-      views:
-        expand: true
-        cwd: './views'
-        src: '**'
-        dest: './bin/views'
-        filter: 'isFile'
-
-      routes:
-        expand: true
-        cwd: './routes/'
-        src: '**'
-        dest: './bin/routes/'
-        filter: 'isFile'
-
-    coffee:
-      glob_to_multiple:
-        expand: true
-        cwd: './bin/'
-        src: './**/*.coffee'
-        dest: './bin/'
-        ext: '.js'
-
     jshint:
       options:
         jshintrc: true
@@ -51,8 +17,8 @@ module.exports = (grunt) ->
         jshintrc: true,
         jshintOptions: [
           'evil'
-          "camelcase"
-          "trailing"
+          'camelcase'
+          'trailing'
         ]
         globals: [
           'console'
@@ -89,11 +55,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', [
     #'coffee_jshint'
-    'clean:bin'
-    'copy:main'
-    'copy:views'
-    'copy:routes'
-    'coffee'
-    'clean:coffee'
     'yuidoc'
   ]
