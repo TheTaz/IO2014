@@ -91,4 +91,8 @@ class JsInjector
     callback()
 
 
+  onPeerCapabilitiesChanged: (callback) ->
+    #method stub
+    @onPeerCapabilitiesChangedCallback=callback
+
 module.exports = JsInjector

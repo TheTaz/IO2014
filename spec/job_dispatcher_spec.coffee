@@ -1,61 +1,61 @@
 JobDispatcher = require "../src/job_dispatcher"
-ConnectionManager = require "../src/connection_manager"
 
 describe "JobDispatcher", ->
   sockets = null
   connManager = null
+  injector = null
   jobDispatcher = null
   taskId=1
 
   beforeEach ->
     sockets = jasmine.createSpyObj "sockets", ["on", "clients"]
-    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","getPeerCapabilities","executeJobOnPeer"]
-    getConn = () -> ["client1","client2"]
+    connManager = jasmine.createSpyObj "connManager", ["getActiveConnections","deleteJobFromPeer","executeJobOnPeer","onPeerConnected","onPeerDisconnected","onJobDone"]
+    getConn = () -> ["client1"]
     connManager.getActiveConnections.and.callFake(getConn)
+    injector = jasmine.createSpyObj "injector", ["getPeerCapabilities","onPeerCapabilitiesChanged"]
     getCap = (socket, taskId, jobId) -> [1]
-    connManager.getPeerCapabilities.and.callFake(getCap)
-    jobDispatcher = new JobDispatcher(connManager)
+    injector.getPeerCapabilities.and.callFake(getCap)
+    jobDispatcher = new JobDispatcher(connManager,injector)
 
   it "dispatches specified task", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
-    expect(jobDispatcher.tasksJobsStatus[taskId]).toEqual({1 : 2, 2 : 2})
     expect(connManager.getActiveConnections).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
-	
+    expect(jobDispatcher.tasks.getTaskJobs(taskId).length).toEqual(2)
+
   it "stops specified task", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
-    jobDispatcher.stopTask(taskId)
-    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client1",1,'1')
-    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client1",1,'2')
-    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client2",1,'1')
-    expect(connManager.deleteJobFromPeer).toHaveBeenCalledWith("client2",1,'2')
+    jobDispatcher.stopJob(taskId,2)
+    expect(connManager.deleteJobFromPeer).toHaveBeenCalled()
   
   it "retrieves jobs for specified task", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     result=jobDispatcher.getJobs(taskId)
-    expect(result).toEqual({1 : 2, 2 : 2})
+    expect(jobDispatcher.tasks.getTaskJobs(taskId).length).toEqual(2)
 
   it "responds to changes in peers capabilities", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onPeerCapabilitiesChanged("client1")
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    #expect(jobDispatcher.tasks.getTaskIds()).toEqual("test")
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 
   it "responds to connection of a new peer", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onPeerConnected("client1")
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
 
   it "responds to disconnection of a peer", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
-    jobDispatcher.onPeerDisconnected({1 : {1: "params"}})
-    expect(jobDispatcher.tasksJobsStatus[taskId][1]).toEqual(1)
-    expect(jobDispatcher.tasksParamsWaiting[taskId][1]).toEqual("params")
+    jobDispatcher.onPeerDisconnected("client1")
+    jobs=jobDispatcher.tasks.getTaskJobs(taskId)
+    for job in jobs
+      expect(job.isWaiting()).toBe(true)
 
   it "responds to job finished by a peer", ->
     jobDispatcher.dispatchTask taskId, [1, 2, 3], (params, n) -> [[1],[2,3]]
     jobDispatcher.onJobDone("client1",taskId,1)
-    expect(jobDispatcher.tasksJobsStatus[taskId][1]).toEqual(3)
-    expect(connManager.getPeerCapabilities).toHaveBeenCalled()
+    expect(jobDispatcher.tasks.getJob(taskId,1).isExecuted()).toBe(true)
+    expect(injector.getPeerCapabilities).toHaveBeenCalled()
     expect(connManager.executeJobOnPeer).toHaveBeenCalled()
