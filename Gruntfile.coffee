@@ -5,7 +5,6 @@ module.exports = (grunt) ->
     clean:
       bin: './bin/'
       coffee: './bin/**/*.coffee'
-      publicScripts: './bin/public_scripts/'
 
     copy:
       main:
@@ -13,13 +12,6 @@ module.exports = (grunt) ->
         cwd: './src/'
         src: '**'
         dest: './bin/'
-        filter: 'isFile'
-
-      publicScripts:
-        expand: true
-        cwd: './bin/public_scripts/'
-        src: '**'
-        dest: './public/scripts'
         filter: 'isFile'
 
       views:
@@ -103,7 +95,5 @@ module.exports = (grunt) ->
     'copy:routes'
     'coffee'
     'clean:coffee'
-    'copy:publicScripts'
-    'clean:publicScripts'
     'yuidoc'
   ]

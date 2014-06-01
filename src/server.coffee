@@ -1,4 +1,5 @@
 # Library imports
+connectAssets = require 'connect-assets'
 express = require 'express'
 http = require 'http'
 path = require 'path'
@@ -24,7 +25,8 @@ app.use express.json()
 app.use express.urlencoded()
 app.use express.methodOverride()
 app.use app.router
-app.use express.static('./public')
+app.use express.static('./assets')
+app.use connectAssets()
 
 app.get clientsEndpoint, clientRoute
 app.get adminEndpoint, adminRoute

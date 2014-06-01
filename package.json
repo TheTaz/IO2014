@@ -4,12 +4,13 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
+        "coffee-script": "1.7.x",
+        "connect-assets": "3.0.x",
         "ejs": "1.0.x",
         "express": "3.x",
         "socket.io": "1.0.x"
     },
     "devDependencies": {
-        "coffee-script": "1.7.x",
         "grunt": "0.4.x",
         "grunt-coffee-jshint": "0.2.x",
         "grunt-contrib-clean": "0.5.x",

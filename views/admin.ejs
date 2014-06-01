@@ -2,7 +2,7 @@
 
   <script src='/socket.io/socket.io.js'></script>
   <script src='//code.jquery.com/jquery-1.10.2.js'></script>
-  <script src='scripts/admin.js'></script>
+  <%- js('admin') %>
 
     <head>
         <meta charset="utf-8">
@@ -65,7 +65,7 @@
                 <button id="sendCommand" type="button" class="btn btn-lg btn-primary">Send</button>
               </div>
             </div>
-            
+
             <div class="col-md-12" style="margin-bottom: 50px">
                 <div class="page-header">
                   <h1><a id="execution">Execution</a></h1>
