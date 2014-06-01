@@ -22,6 +22,20 @@ module.exports = (grunt) ->
         dest: './public/scripts'
         filter: 'isFile'
 
+      views:
+        expand: true
+        cwd: './views'
+        src: '**'
+        dest: './bin/views'
+        filter: 'isFile'
+
+      routes:
+        expand: true
+        cwd: './routes/'
+        src: '**'
+        dest: './bin/routes/'
+        filter: 'isFile'
+
     coffee:
       glob_to_multiple:
         expand: true
@@ -85,6 +99,8 @@ module.exports = (grunt) ->
     #'coffee_jshint'
     'clean:bin'
     'copy:main'
+    'copy:views'
+    'copy:routes'
     'coffee'
     'clean:coffee'
     'copy:publicScripts'
