@@ -1,5 +1,5 @@
 describe "Client", ->
-  Client = require "../src/public_scripts/client"
+  Client = require "../assets/js/client.js"
 
   beforeEach ->
     @socket = jasmine.createSpyObj "socket", ["on", "emit", "removeListener"]
@@ -40,17 +40,17 @@ describe "Client", ->
     taskId = 1
     operation = { msgId: msgId, data: { taskId: taskId, runFun: "testFun"} }
     @client.onAddNewTask operation
-    
+
     deleteMsgId = 6
     deleteOperation = { msgId: deleteMsgId, data: { taskId: taskId }}
     @client.onDeleteTask deleteOperation
     expect(@client.tasks[taskId]).toBeUndefined()
-    expect(@socket.emit).toHaveBeenCalledWith('ack', { msgId: deleteMsgId })  
-    
+    expect(@socket.emit).toHaveBeenCalledWith('ack', { msgId: deleteMsgId })
+
     deleteOperation.msgId = 17
     @client.onDeleteTask deleteOperation
     expect(@client.tasks[taskId]).toBeUndefined()
-    expect(@socket.emit).toHaveBeenCalledWith('ack', { msgId: deleteMsgId })  
+    expect(@socket.emit).toHaveBeenCalledWith('ack', { msgId: deleteMsgId })
 
   it "does not execute task if it does not exist", ->
     returnResult = jasmine.createSpy 'returnResult'
@@ -121,9 +121,9 @@ describe "Client", ->
 
     operation = { data: { taskId: taskId, jobId: jobId } }
     msgId = @client.lastClientMsgId - 1
-    taskResult = { 
-      msgId: msgId, 
-      data: { 
+    taskResult = {
+      msgId: msgId,
+      data: {
         taskId: taskId,
         jobId: jobId,
         jobResult: result

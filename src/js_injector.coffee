@@ -17,8 +17,8 @@ class JsInjector
 
   constructor: (@connectionManager) ->
     @taskFunctionsList = {}
-    @injectCallback = { 
-      onAck: (socket, taskId) -> 
+    @injectCallback = {
+      onAck: (socket, taskId) ->
         @socketsState[socket].push taskId
       onError: (socket, taskId) ->
         console.log "Inject callback error::Socket: #{socket}::taskId: #{taskId} !"
@@ -50,7 +50,7 @@ class JsInjector
         if not taskId in @socketsState[socket]
           @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback)
       console.log "CodeInjector::Code loaded for task: #{taskId} !"
-    else 
+    else
       console.log "CodeInjector::Complementing sockets for task: #{taskId}..."
       for socket in @connectionManager.getActiveConnections()
         @socketsState[socket] ?= []
@@ -61,7 +61,7 @@ class JsInjector
 
   ###*
   # Unloads code from sockets, code is recognized by task id.
-  # @method unloadCode  
+  # @method unloadCode
   # @param {Integer} taskId specified task identificator
   ###
 
@@ -87,8 +87,8 @@ class JsInjector
   # @method onPeerCapabilitiesChanged
   ###
 
-  onPeerCapabilitiesChanged: (callback) ->
-    callback()
+  onPeerCapabilitiesChanged: () ->
+    true
 
 
 module.exports = JsInjector
