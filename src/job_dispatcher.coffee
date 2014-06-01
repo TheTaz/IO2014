@@ -8,9 +8,10 @@ class JobDispatcher
     sent : 2
     executed: 3	
 
-  constructor: (@connectionManager)->
+  constructor: (@connectionManager, @jsInjector)->
     @tasksJobsStatus={}
     @tasksParamsWaiting={}
+    @jsInjector.onPeerCapabilitiesChanged @onPeerCapabilitiesChanged
 
   ###*
   # @method dispatchTask
@@ -19,6 +20,9 @@ class JobDispatcher
   # @param {Function} taskSplitMethod a function taking as parameters: task parameters and number of available clients 
   ###
   dispatchTask: (id, taskParams, taskSplitMethod) ->
+
+    console.log "JobDispatcher::dispatchTask", id, taskParams, taskSplitMethod
+
     packageTaskParams = (id, params) ->
       type: "params"
       taskId: id
@@ -27,23 +31,41 @@ class JobDispatcher
     @tasksJobsStatus[id]={}
     @tasksParamsWaiting[id]={}
     clients = @connectionManager.getActiveConnections()
-    splitInto=Math.min(taskParams.length,10)
     if clients
-      splitInto=Math.min(taskParams.length,2*clients.length)
+      splitInto = Math.max(10, 2 * clients.length)
+    else
+      splitInto = 10
+
+    console.log "4", splitInto
+
     splitParams = taskSplitMethod(taskParams, splitInto)
+
+    console.log "Splitted:", splitParams
+
     data = (packageTaskParams(id, params) for params in splitParams)
-    i = 1
+    i = 0
+
+
+    console.log "5", data
+
     for d in data
       @tasksJobsStatus[id][i]=JobStatus.waiting
-      @tasksParamsWaiting[id][i]=data
+      @tasksParamsWaiting[id][i]=data[i]
       i++
+
+    console.log "6"
+
     if clients
       i = 1
       for client in clients
-        capabilities=@connectionManager.getPeerCapabilities(client)
+
+        capabilities=@jsInjector.getPeerCapabilities(client)
+        console.log "Client", capabilities
         if id in capabilities
           @sendParamsToPeer(client, id, i)
           i++
+
+    console.log "7"
 	  
   ###*
   # Stops dispatching and executing jobs for the specified task
@@ -74,7 +96,7 @@ class JobDispatcher
   # @method onPeerCapabilitiesChanged
   # @param {Object} peerSocket peers socket
   ###
-  onPeerCapabilitiesChanged: (peerSocket) ->
+  onPeerCapabilitiesChanged: (peerSocket) =>
     @tryToAssignAvailableJobs(peerSocket)
 
   ###*
@@ -117,6 +139,8 @@ class JobDispatcher
   # @param {Id} jobId jobs unique id
   ###
   sendParamsToPeer: (peer, taskId, jobId) ->
+    console.log "SendParmsToPeer", taskId, jobId
+    console.log peer, taskId, jobId
     @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId])
     @tasksJobsStatus[taskId][jobId]=JobStatus.sent
     delete @tasksParamsWaiting[taskId][jobId]
@@ -129,9 +153,14 @@ class JobDispatcher
   ###
   getNumberOfJobsToAssign: ->
     jobsNumber = 0
-    for task in @tasksParamsWaiting
-        for job in @tasksParamsWaiting[task]
-          jobsNumber++
+    console.log "TaskParmsWaiting", @tasksParamsWaiting
+    for task of @tasksParamsWaiting
+      console.log "For task", task, @tasksParamsWaiting[task]
+      for job of @tasksParamsWaiting[task]
+        jobsNumber++
+
+    console.log "JobSNumber", jobsNumber
+
     if jobsNumber == 0
       return 0
     peers = @connectionManager.getActiveConnections()
@@ -147,13 +176,17 @@ class JobDispatcher
   # @method tryToAssignAvailableJobs
   ###
   tryToAssignAvailableJobs: (peerSocket) ->
-    capabilities = @connectionManager.getPeerCapabilities(peerSocket)
+
+    capabilities = @jsInjector.getPeerCapabilities(peerSocket)
     howMany = @getNumberOfJobsToAssign()
+    console.log "tryToAssignAvailableJobs", @jsInjector.getPeerCapabilities(peerSocket), howMany, Object.getOwnPropertyNames(@tasksParamsWaiting).length
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
-      for task in @tasksParamsWaiting
-        if task in capabilities
-          for job in @tasksParamsWaiting[task]
-            @sendParamsToPeer(peerSocket, task, @tasksParamsWaiting[task][job])
+      for task of @tasksParamsWaiting
+        console.log "OMG1", task, capabilities, task in capabilities, typeof task, typeof capabilities[0]
+        if +task in capabilities
+          for job of @tasksParamsWaiting[task]
+            console.log "Params", @tasksParamsWaiting[task][job]
+            @sendParamsToPeer(peerSocket, task, job)
             howMany--
             if howMany == 0
               break

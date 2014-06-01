@@ -5,6 +5,7 @@ io = require('socket.io').listen(server)
 
 JobDispatcher = require './job_dispatcher'
 ConnectionManager = require './connection_manager'
+JsInjector = require './js_injector'
 
 #tasks = require './tasks'
 
@@ -15,7 +16,8 @@ clientsIO = io.of clientsEndpoint
 adminIO = io.of adminEndpoint
 
 connectionManager = new ConnectionManager(clientsIO, true)
-dispatcher = new JobDispatcher(connectionManager)
+jsInjector = new JsInjector(connectionManager)
+dispatcher = new JobDispatcher(connectionManager, jsInjector)
 
 initializeServer = () ->
   app.use(express.static('./public'))
@@ -27,7 +29,7 @@ initializeConnectionManager = () ->
 
 initializeAdminConsole = () ->
   AdminConsole = require './admin_console'
-  new AdminConsole(adminIO, dispatcher, connectionManager)
+  new AdminConsole(adminIO, dispatcher, connectionManager, jsInjector)
 
 initialize = () ->
   initializeServer()

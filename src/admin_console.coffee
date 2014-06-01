@@ -17,14 +17,14 @@ class AdminConsole
   # @params {JobDispatcher} dispatcher object handling tasks dispatching
   # @params {ConnectionManager} connectionManager object maintaining connections with clients
   ###
-  constructor: (@sockets, @dispatcher, @connectionManager) ->
+  constructor: (@sockets, @dispatcher, @connectionManager, @jsInjector) ->
 
     ###*
     # Object responsible for injecting task code to clients
     # @property jsInjector
     # @type {JsInjector}
     ###
-    @jsInjector = new JsInjector(@connectionManager)
+
 
     ###*
     # Object responsible for aggregating results sent from clients
@@ -65,7 +65,12 @@ class AdminConsole
           taskId = @taskManager.addTask task
           @taskManager.startTask taskId
           console.log 'command executed: ' + data
+
+          console.log "10"
+
           @notifyStarted socket, taskId
+
+          console.log "11"
         catch err
           console.log "Failed to add task: ", task
           console.log "Cannot add task due to: ", err.message
@@ -76,8 +81,8 @@ class AdminConsole
   # @method notifyStarted
   # @param {Integer} taskId id of added task
   ###
-  notifyStarted: (taskId) ->
-    @sockets.emit 'started', { taskId: taskId }
+  notifyStarted: (socket, taskId) ->
+    socket.emit 'started', { taskId: taskId }
 
   ###*
   # Notifies admin console that scheduled a task, that error took place

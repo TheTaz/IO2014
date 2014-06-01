@@ -87,11 +87,14 @@ class ConnectionManager extends events.EventEmitter
   # @return Integer msgId of sent message
   ###
   sendNewTaskToPeer: (socket, taskId, runFun, callback) ->
+
     message = @generateNewMessage()
     if message?
       @responseCallbacks[message.msgId] = { taskId: taskId, callback: callback }
-      if not runFun instanceof String and not typeof runFun is 'string'
+      if runFun not instanceof String and typeof runFun != 'string'
         runFun = '(' + runFun + ')'
+
+      console.log "Sending new task: ", taskId, runFun, runFun not instanceof String, (typeof runFun) != 'string', typeof runFun
       message.data = {
         taskId: taskId,
         runFun: runFun
