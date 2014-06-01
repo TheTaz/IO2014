@@ -29,6 +29,7 @@ class JsInjector
       onError: (socket, taskId) ->
         console.log "Unload callback error::Socket: #{socket}::taskId: #{taskId} !"
     }
+
     @socketsState = {}
 
   ###*
@@ -56,6 +57,7 @@ class JsInjector
         if not taskId in @socketsState[socket]
           @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback)
       console.log "CodeInjector::Sockets have been complemented for task: #{taskId} !"
+    @onPeerCapabilitiesChanged()
 
   ###*
   # Unloads code from sockets, code is recognized by task id.
@@ -70,5 +72,23 @@ class JsInjector
       @connectionManager.deleteTaskFromPeer(socket, taskId, @unloadCallback)
     @taskFunctionsList[taskId] = null
     console.log "CodeInjector::Code unloaded for task: #{taskId} !"
+    @onPeerCapabilitiesChanged()
+
+  ###*
+  # Returns socketsState map.
+  # @method getPeerCapabilities
+  ###
+
+  getPeerCapabilities: () ->
+    return @socketsState
+
+  ###*
+  # Callback invocated when peer capabilities are changed.
+  # @method onPeerCapabilitiesChanged
+  ###
+
+  onPeerCapabilitiesChanged: (callback) ->
+    callback()
+
 
 module.exports = JsInjector

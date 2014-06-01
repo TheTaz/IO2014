@@ -40,6 +40,15 @@ class AdminConsole
     ###
     @taskManager = new TaskManager(@dispatcher, @jsInjector, @resultAgregator)
 
+    @resultAgregator.on 'partialResultReady', (taskId, readyJobIdsCount) =>
+      allJobIdsCount = Object.keys(@dispatcher.getJobs(taskId)).length
+      percentage = readyJobIdsCount * 100 / allJobIdsCount
+      if percentage >= 100
+        result = @resultAgregator.getCurrentResult(taskId).mergedResult
+        @notifyResult taskId, result
+      else
+        @notifyProgress taskId, parseInt percentage
+
     @sockets.on 'connection', (socket) =>
       console.log 'admin connected'
       socket.on 'command', (data) =>
