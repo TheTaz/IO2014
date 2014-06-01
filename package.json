@@ -30,7 +30,7 @@
     "scripts": {
         "prestart": "node -e \"require('grunt').cli();\"",
         "start": "node ./bin/server.js",
-        "test": "jasmine-node --coffee ./spec/",
+        "test": "jasmine-node --verbose --coffee ./spec/",
         "selenium": "start-selenium",
         "accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"
     }
