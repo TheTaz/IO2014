@@ -1,37 +1,20 @@
 module.exports = (grunt) ->
+
+  grunt.loadNpmTasks 'grunt-coffeelint'
+  grunt.loadNpmTasks 'grunt-contrib-yuidoc'
+
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
-    jshint:
-      options:
-        jshintrc: true
-
-      all: [
-        './src/**/*.js'
-        './spec/**/*.js'
-        './acceptance_test/**/*.js'
+    coffeelint:
+      configFile: 'coffeelint.json'
+      app: [
+        'Gruntfile.coffee'
+        'server.coffee'
+        'src/**/*.coffee'
+        'spec/**/*.coffee'
+        'accept/**/*.coffee'
       ]
-
-    coffee_jshint:
-      options:
-        jshintrc: true,
-        jshintOptions: [
-          'evil'
-          'camelcase'
-          'trailing'
-        ]
-        globals: [
-          'console'
-          'require'
-          'module'
-          'jasmine'
-          'it'
-          'expect'
-        ]
-
-      source: './src/**/*.coffee'
-      specs: './spec/**/*.coffee'
-      accceptance_tests: './acceptance_test/**/*.coffee'
 
     yuidoc:
       all:
@@ -41,19 +24,6 @@ module.exports = (grunt) ->
         options:
           linkNatives: 'true'
           paths: ['./src/']
-          outdir: './docs/'
+          outdir: './doc/'
           syntaxtype: 'coffee'
           extension: '.coffee'
-
-
-  grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-copy'
-  grunt.loadNpmTasks 'grunt-contrib-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-jshint'
-  grunt.loadNpmTasks 'grunt-coffee-jshint'
-  grunt.loadNpmTasks 'grunt-contrib-yuidoc'
-
-  grunt.registerTask 'default', [
-    #'coffee_jshint'
-    'yuidoc'
-  ]
