@@ -35,7 +35,7 @@ class JobDispatcher
     clients = @connectionManager.getActiveConnections()
 
     if clients
-      splitInto = Math.max(10, 2 * clients.length)
+      splitInto = Math.max(100, 2 * clients.length)
     else
       splitInto = 10
 
