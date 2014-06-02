@@ -4,23 +4,25 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
+        "coffee-script": "1.7.x",
+        "connect-assets": "3.0.x",
+        "ejs": "1.0.x",
         "express": "3.x",
-        "socket.io": "0.9.x"
+        "socket.io": "1.0.x"
     },
     "devDependencies": {
-        "jasmine-node": "2.0",
-        "coffee-script": "1.7.x",
         "grunt": "0.4.x",
-        "yuidocjs": "0.3.x",
-        "webdriverjs": "1.6.x",
+        "grunt-coffee-jshint": "0.2.x",
+        "grunt-contrib-clean": "0.5.x",
+        "grunt-contrib-coffee": "0.10.x",
+        "grunt-contrib-copy": "0.5.x",
+        "grunt-contrib-jshint": "0.10.x",
+        "grunt-contrib-yuidoc": "0.3.x",
+        "jasmine-node": "2.0",
         "phantomjs": "1.9.x",
         "selenium-standalone": "2.41.x",
-        "grunt-contrib-coffee": "0.10.x",
-        "grunt-contrib-clean": "0.5.x",
-        "grunt-contrib-copy": "0.5.x",
-        "grunt-contrib-yuidoc": "0.3.x",
-        "grunt-contrib-jshint": "0.10.x",
-        "grunt-coffee-jshint": "0.2.x"
+        "webdriverjs": "1.6.x",
+        "yuidocjs": "0.3.x"
     },
     "directories": {
         "src": "./src",
@@ -29,7 +31,7 @@
     },
     "scripts": {
         "prestart": "node -e \"require('grunt').cli();\"",
-        "start": "node ./bin/server.js",
+        "start": "coffee ./server.coffee",
         "test": "jasmine-node --verbose --coffee ./spec/",
         "selenium": "start-selenium",
         "accept": "jasmine-node --captureExceptions --coffee ./acceptance_test/"

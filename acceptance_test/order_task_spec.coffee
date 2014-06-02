@@ -4,13 +4,13 @@ describe "Task ordering tests:", ->
 
   client = {}
   token = ""
-    
+
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 9999999
 
   checkTask=(task,expectedResult,done)->
     client
-      .url('http://localhost:3000/admin.html')
-      .setValue("#command",task, (err)-> 
+      .url('http://localhost:3000/admin')
+      .setValue("#command",task, (err)->
         expect(err).toBeNull()
       )
       .buttonClick("#sendCommand",(err)->
@@ -28,10 +28,10 @@ describe "Task ordering tests:", ->
         browserName: process.env.browser
     )
     client.init()
-  
+
   it "admin panel is displayed with task input field.", (done) ->
     client
-      .url('http://localhost:3000/admin.html')
+      .url('http://localhost:3000/admin')
       .getText('body', (err, result) ->
         expect(result.length).toBeGreaterThan(0)
       )
@@ -46,7 +46,7 @@ describe "Task ordering tests:", ->
   it "successfully orders a valid task", (done) ->
     fs = require("fs")
     task = fs.readFileSync("./example_task.js", "utf8")
-    checkTask(task,"Converting circular structure to JSON",done)	
+    checkTask(task,"Converting circular structure to JSON",done)
 
   it "informs about invalid TaskParams object", (done) ->
     fs = require("fs")
