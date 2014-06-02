@@ -87,23 +87,13 @@ class TaskManager extends events.EventEmitter
     task = @tasks[taskId]
     return false if not task?
 
-    console.log "1"
-
     @resultAggregator.aggregateOn taskId, task.taskMerge
-
-    console.log "2"
 
     @injector.injectCode taskId, task.taskProcess
 
-    console.log "3"
-
     @dispatcher.dispatchTask taskId, task.taskParams, task.taskSplit
 
-    console.log "8"
-
     @setTaskStatus taskId, @TaskStatus.running
-
-    console.log "9"
 
     return true
 
@@ -178,7 +168,7 @@ class TaskManager extends events.EventEmitter
     try
       switch newStatus
         when @TaskStatus.done
-          task.owner.emit('result', @getTaskState(taskId).currentResult)
+          task.owner.emit('result', "Result: " + @getTaskState(taskId).currentResult)
         when @TaskStatus.failed
           task.owner.emit('result', "Task failed!")
         when @TaskStatus.removed

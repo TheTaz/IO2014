@@ -35,6 +35,8 @@ class JsInjector extends events.EventEmitter
         console.log "Unload callback error::Socket: #{socket}::taskId: #{taskId} !"
     }
 
+    @connectionManager.onPeerConnected @newPeerConnected
+
     @socketsState = {}
 
   ###*
@@ -53,7 +55,6 @@ class JsInjector extends events.EventEmitter
       for socket in @connectionManager.getActiveConnections()
 
         @socketsState[socket] ?= []
-        console.log "Client 1", taskId, taskId not in @socketsState[socket]
         if taskId not in @socketsState[socket]
           @connectionManager.sendNewTaskToPeer(socket, taskId, @taskFunctionsList[taskId], @injectCallback)
 
@@ -83,21 +84,25 @@ class JsInjector extends events.EventEmitter
     console.log "CodeInjector::Code unloaded for task: #{taskId} !"
 
   ###*
-  # Returns socketsState map.
+  # Returns capabilities of given peer.
   # @method getPeerCapabilities
   ###
-
-  getPeerCapabilities: () ->
-    return @socketsState
-
   getPeerCapabilities: (socket) ->
     return @socketsState[socket]
+
+
+  ###*
+  # Injects all currently available task runFun codes to given peer.
+  # @method newPeerConnected
+  ###
+  newPeerConnected: (socket) =>
+    for taskId of @taskFunctionsList
+      @injectCode(taskId)
 
   ###*
   # Callback invocated when peer capabilities are changed.
   # @method onPeerCapabilitiesChanged
   ###
-
   onPeerCapabilitiesChanged: (callback) ->
     @on 'peer_capabilities_changed', callback
 

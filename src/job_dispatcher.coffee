@@ -12,6 +12,8 @@ class JobDispatcher
     @tasksJobsStatus={}
     @tasksParamsWaiting={}
     @jsInjector.onPeerCapabilitiesChanged @onPeerCapabilitiesChanged
+    @connectionManager.on 'resultReady', (socket, payload) =>
+      @onJobDone(socket, payload.taskId, payload.jobId)
 
   ###*
   # @method dispatchTask
@@ -31,41 +33,25 @@ class JobDispatcher
     @tasksJobsStatus[id]={}
     @tasksParamsWaiting[id]={}
     clients = @connectionManager.getActiveConnections()
+
     if clients
       splitInto = Math.max(10, 2 * clients.length)
     else
       splitInto = 10
 
-    console.log "4", splitInto
-
     splitParams = taskSplitMethod(taskParams, splitInto)
-
-    console.log "Splitted:", splitParams
 
     data = (packageTaskParams(id, params) for params in splitParams)
     i = 0
-
-
-    console.log "5", data
 
     for d in data
       @tasksJobsStatus[id][i]=JobStatus.waiting
       @tasksParamsWaiting[id][i]=data[i]
       i++
 
-    console.log "6"
-
     if clients
-      i = 1
       for client in clients
-
-        capabilities=@jsInjector.getPeerCapabilities(client)
-        console.log "Client", capabilities
-        if id in capabilities
-          @sendParamsToPeer(client, id, i)
-          i++
-
-    console.log "7"
+        @tryToAssignAvailableJobs(client)
 	  
   ###*
   # Stops dispatching and executing jobs for the specified task
@@ -139,9 +125,8 @@ class JobDispatcher
   # @param {Id} jobId jobs unique id
   ###
   sendParamsToPeer: (peer, taskId, jobId) ->
-    console.log "SendParmsToPeer", taskId, jobId
-    console.log peer, taskId, jobId
-    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId])
+    console.log "sendParamsToPeer", taskId, jobId, @tasksParamsWaiting[taskId][jobId]
+    @connectionManager.executeJobOnPeer(peer, taskId, jobId, @tasksParamsWaiting[taskId][jobId].params)
     @tasksJobsStatus[taskId][jobId]=JobStatus.sent
     delete @tasksParamsWaiting[taskId][jobId]
     if Object.getOwnPropertyNames(@tasksParamsWaiting[taskId]).length == 0
@@ -153,22 +138,13 @@ class JobDispatcher
   ###
   getNumberOfJobsToAssign: ->
     jobsNumber = 0
-    console.log "TaskParmsWaiting", @tasksParamsWaiting
     for task of @tasksParamsWaiting
-      console.log "For task", task, @tasksParamsWaiting[task]
       for job of @tasksParamsWaiting[task]
         jobsNumber++
 
-    console.log "JobSNumber", jobsNumber
-
     if jobsNumber == 0
       return 0
-    peers = @connectionManager.getActiveConnections()
-    if peers
-      if peers.length >= jobsNumber or peers.length==0
-        return jobsNumber
-      else 
-        return Math.max(jobsNumber/(peers.length),1)
+
     return Math.min(jobsNumber,4)
 
   ###*
@@ -179,13 +155,10 @@ class JobDispatcher
 
     capabilities = @jsInjector.getPeerCapabilities(peerSocket)
     howMany = @getNumberOfJobsToAssign()
-    console.log "tryToAssignAvailableJobs", @jsInjector.getPeerCapabilities(peerSocket), howMany, Object.getOwnPropertyNames(@tasksParamsWaiting).length
     if Object.getOwnPropertyNames(@tasksParamsWaiting).length != 0
       for task of @tasksParamsWaiting
-        console.log "OMG1", task, capabilities, task in capabilities, typeof task, typeof capabilities[0]
         if +task in capabilities
           for job of @tasksParamsWaiting[task]
-            console.log "Params", @tasksParamsWaiting[task][job]
             @sendParamsToPeer(peerSocket, task, job)
             howMany--
             if howMany == 0

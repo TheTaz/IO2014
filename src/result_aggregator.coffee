@@ -41,10 +41,8 @@ class ResultAggregator extends events.EventEmitter
   ###
   getCurrentResult: (taskId) ->
     if @results[taskId]
-      res = (result for jobId, result of @results[taskId].partialResults)
-      console.log "Results", res, @results[taskId].partialResults
       partialResults: @results[taskId].partialResults,
-      mergedResult: @results[taskId].taskMergeFun(res)
+      mergedResult: @results[taskId].taskMergeFun((output: result for jobId, result of @results[taskId].partialResults))
 
   ###*
   # Emits event containing information about given task update
@@ -63,7 +61,6 @@ class ResultAggregator extends events.EventEmitter
   # @param {Object} result task result
   ###
   addResultFor: (taskId, jobId, result) ->
-    console.log "AddResult", taskId, jobId, result
     if @results[taskId]
       @results[taskId].partialResults[jobId] = result
 
