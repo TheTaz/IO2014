@@ -9,6 +9,7 @@ socketIo            = require 'socket.io'
 AdminConsole        = require path.join(__dirname, 'src', 'admin_console')
 ConnectionManager   = require path.join(__dirname, 'src', 'connection_manager')
 JobDispatcher       = require path.join(__dirname, 'src', 'job_dispatcher')
+JsInjector          = require path.join(__dirname, 'src', 'js_injector')
 
 # Set up an application
 app = express()
@@ -39,8 +40,9 @@ server.listen app.get 'port'
 clientsIO = io.of clientsEndpoint
 adminIO = io.of adminEndpoint
 connectionManager = new ConnectionManager clientsIO, true
-dispatcher = new JobDispatcher connectionManager
-adminConsole = new AdminConsole adminIO, dispatcher, connectionManager
+jsInjector = new JsInjector connectionManager
+dispatcher = new JobDispatcher connectionManager, jsInjector
+adminConsole = new AdminConsole adminIO, dispatcher, connectionManager, jsInjector
 
 connectionManager.onPeerConnected (socket) ->
   console.log 'New user connected'
